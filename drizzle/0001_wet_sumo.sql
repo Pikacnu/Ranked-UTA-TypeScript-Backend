@@ -1,0 +1,1 @@
+ALTER TABLE `party` ADD `is_in_queue` integer DEFAULT 0;
