@@ -8,6 +8,8 @@ import {
 	ServerStatus,
 	SizeToQueueName,
 	status,
+	UUIDFromArray,
+	UUIDStringToArray,
 	WebSocketError,
 	type DamageData,
 	type KillData,
@@ -19,7 +21,11 @@ import {
 import db, { gameTable, partyTable, playerTable } from '../src/db';
 import { eq, is, or, sql } from 'drizzle-orm';
 import { QueueManager, PartyMatchmaker, MatchResult } from './queue';
-import { calculateAverageRating, getRoundByRankScore } from './rank';
+import {
+	calculateAverageRating,
+	calculateTwoTeamAfterGameRating,
+	getRoundByRankScore,
+} from './rank';
 
 /*
 	Gate File Path "C:\Users\User\AppData\Local\Gate\bin"
@@ -134,6 +140,9 @@ const server = Bun.serve({
 			try {
 				const parsedMessage: Message = JSON.parse(message);
 				const { action, sessionId, payload } = parsedMessage;
+				if (parsedMessage) {
+					logger.ws(action, sessionId || 'unknown', payload || {});
+				}
 				const client = clients.find((c) => c.clientId === sessionId);
 				switch (action) {
 					case Action.handshake:
@@ -272,7 +281,7 @@ const server = Bun.serve({
 							partyId: playerDataFromDB.party
 								? playerDataFromDB.party.id
 								: undefined,
-							isInQueue: !!false,
+							isInQueue: false,
 						};
 						ws.sendText(
 							JSON.stringify({
@@ -540,20 +549,9 @@ const server = Bun.serve({
 							} else {
 								throw new WebSocketError('No game to update status');
 							}
-							// Update Player Data
-							client.game.players.forEach((player) => {
-								db.update(playerTable)
-									.set({
-										gameCount: sql`gameCount + 1`,
-										killCount: sql`killCount + ${player.killCount}`,
-										deathCount: sql`deathCount + ${player.deathCount}`,
-										assistCount: sql`assistCount + ${player.assistCount}`,
-									})
-									.where(eq(playerTable.uuid, player.uuid))
-									.execute();
-							});
 							if (gameStatus === GameStatus.idle) {
 								if (client?.game) {
+									//send player to lobby
 									ws.send(
 										JSON.stringify({
 											status: status.success,
@@ -752,6 +750,146 @@ const server = Bun.serve({
 						}
 
 						break;
+
+					case Action.player_info:
+						if (!payload || !payload.data) {
+							throw new WebSocketError('Player info is required');
+						}
+						try {
+							const data = JSON.parse(payload.data);
+							const uuid = UUIDFromArray(
+								(data.UUID as string)
+									.replace(/\[I;/g, '')
+									.replace(/]/g, '')
+									.split(',')
+									.map((v) => parseInt(v, 10)),
+							);
+							const killCount = data.elim || 0;
+							const deathCount = data.death || 0;
+							const assistCount = data.assist || 0;
+							const damageDealt = (data.damagedealt?.value || 0) * 0.01;
+							const damageTaken = (data.damagetaken?.value || 0) * 0.01;
+							const playerData = {
+								uuid,
+								killCount,
+								deathCount,
+								assistCount,
+								damageDealt,
+								damageTaken,
+							};
+							//{UUID:[I;0,0,0,0], elim:0, death: 0, assist: 0, damagedealt:{type:"float", value:0}, damagetaken:{type:"float", value:0}}
+						} catch (error) {
+							logger.error('Error processing player info', error);
+							throw new WebSocketError('Error processing player info');
+						}
+
+						/*
+							// Update Player Data
+							client.game.players.forEach((player) => {
+								db.update(playerTable)
+									.set({
+										gameCount: sql`gameCount + 1`,
+										killCount: sql`killCount + ${player.killCount}`,
+										deathCount: sql`deathCount + ${player.deathCount}`,
+										assistCount: sql`assistCount + ${player.assistCount}`,
+										rankScore: sql`rankScore + ${player.score}`,
+									})
+									.where(eq(playerTable.uuid, player.uuid))
+									.execute();
+							}); */
+						break;
+
+					case Action.output_win:
+						if (!payload || !payload.data) {
+							throw new WebSocketError('Win data is required');
+						}
+						try {
+							const winData = JSON.parse(payload.data);
+							const { Win, Lose } = winData;
+							if (!Win || !Lose) {
+								throw new WebSocketError('Win and Lose data are required');
+							}
+							const winPlayers = Win.map((p: any) => ({
+								uuid: UUIDFromArray(UUIDStringToArray(p.UUID || '')),
+							}));
+							const losePlayers = Lose.map((p: any) => ({
+								uuid: UUIDFromArray(UUIDStringToArray(p.UUID || '')),
+							}));
+
+							if (!client?.game?.id) {
+								throw new WebSocketError('No game to process win data');
+							}
+							if (!client.game || client.game === undefined) {
+								throw new WebSocketError('No game to process win data');
+							}
+							if (!client.game.players) {
+								throw new WebSocketError('No players in game to update stats');
+							}
+
+							const Team1 = client.game.players.filter((p) => p.isTeam1);
+							const Team2 = client.game.players.filter((p) => !p.isTeam1);
+							let isTeam1Win;
+							if (
+								Team1.every((p) =>
+									winPlayers.some((wp: string) => wp === p.uuid),
+								)
+							) {
+								isTeam1Win = true;
+							} else if (
+								Team2.every((p) =>
+									winPlayers.some((wp: string) => wp === p.uuid),
+								)
+							) {
+								isTeam1Win = false;
+							} else {
+								throw new WebSocketError(
+									'Win data does not match game players',
+								);
+							}
+							// Update player stats
+
+							const RankScore = calculateTwoTeamAfterGameRating(
+								Team1,
+								Team2,
+								isTeam1Win,
+							);
+
+							await db.transaction(async (tx) => {
+								if (!client.game?.players) {
+									throw new WebSocketError('No players in game to update');
+								}
+								if (!RankScore || Object.keys(RankScore).length === 0) {
+									throw new WebSocketError('No rank score data to update');
+								}
+								for (const player of client.game.players) {
+									const isWinner = isTeam1Win
+										? player.isTeam1
+										: !player.isTeam1;
+									const newRankScore =
+										player.score +
+										(player.isTeam1
+											? RankScore.team1Rating
+											: RankScore.team2Rating || 0);
+									await tx
+										.update(playerTable)
+										.set({
+											rankScore: newRankScore,
+											gameCount: sql`gameCount + 1`,
+											killCount: sql`killCount + ${isWinner ? 1 : 0}`,
+											deathCount: sql`deathCount + ${isWinner ? 0 : 1}`,
+											assistCount: sql`assistCount + ${
+												isWinner ? player.assistCount : 0
+											}`,
+										})
+										.where(eq(playerTable.uuid, player.uuid));
+								}
+							});
+						} catch (error) {
+							logger.error('Error processing win data', error);
+							throw new WebSocketError('Error processing win data');
+						}
+						break;
+
 					default:
 						logger.warn('Unknown action received', { action });
 				}

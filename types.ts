@@ -7,6 +7,10 @@ export enum Action {
 	request_data = 'request_data',
 	get_player_data = 'get_player_data',
 	update_player_data = 'update_player_data',
+
+	player_info = 'player_info',
+	output_win = 'output_win',
+
 	party = 'party',
 	queue = 'queue',
 	queue_leave = 'queue_leave',
@@ -207,3 +211,40 @@ export class WebSocketError extends Error {
 		this.name = 'WebSocketError';
 	}
 }
+
+export const UUIDFromArray = (arr: number[]): string => {
+	if (arr.length !== 4) {
+		throw new Error('Array must be of length 4');
+	}
+
+	// Convert each 32-bit signed integer to bytes in big-endian format
+	const bytes: number[] = [];
+	for (const num of arr) {
+		// Handle signed integers by using DataView for proper byte conversion
+		const buffer = new ArrayBuffer(4);
+		const view = new DataView(buffer);
+		view.setInt32(0, num, false); // false = big-endian
+
+		bytes.push(view.getUint8(0));
+		bytes.push(view.getUint8(1));
+		bytes.push(view.getUint8(2));
+		bytes.push(view.getUint8(3));
+	}
+
+	const hex = bytes.map((byte) => byte.toString(16).padStart(2, '0')).join('');
+
+	return [
+		hex.slice(0, 8),
+		hex.slice(8, 12),
+		hex.slice(12, 16),
+		hex.slice(16, 20),
+		hex.slice(20, 32),
+	].join('-');
+};
+
+export const UUIDStringToArray = (uuid: string): number[] =>
+	uuid
+		.replace(/\[I;/g, '')
+		.replace(/]/g, '')
+		.split(',')
+		.map((v) => parseInt(v, 10));
