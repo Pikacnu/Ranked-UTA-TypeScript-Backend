@@ -613,7 +613,7 @@ const server = Bun.serve({
 						if (!payload || !payload.data) {
 							throw new WebSocketError('Kill data is required');
 						}
-						const killData = payload.data.kill as KillData;
+						const killData = payload.data as KillData;
 						if (!killData.target || !killData.attacker || !killData.type) {
 							throw new WebSocketError('Invalid kill data');
 						}
@@ -654,10 +654,10 @@ const server = Bun.serve({
 						break;
 
 					case Action.damage:
-						if (!payload || !payload.data || !payload.data.damage) {
+						if (!payload || !payload.data || !payload.data) {
 							throw new WebSocketError('Damage data is required');
 						}
-						const damageData = payload.data.damage as DamageData;
+						const damageData = payload.data as DamageData;
 						if (
 							!damageData.target ||
 							!damageData.attacker ||
@@ -740,7 +740,7 @@ const server = Bun.serve({
 															client.game.players.map((p) => p.score),
 														) || 0,
 												  )
-										},banRuleType:1,enableSameChar:1,enableNewSkil`,
+										},banRuleType:1,enableSameChar:1,enableNewSkill:0}`,
 										// Placeholder for actual command to Start Game
 									},
 								}),
