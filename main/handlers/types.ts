@@ -1,5 +1,6 @@
 import type { ServerWebSocket } from 'bun';
 import type { Message, Server } from '../../types';
+import type { QueueManager } from '../queue';
 
 export interface HandlerContext {
 	ws: ServerWebSocket<unknown>;
@@ -14,7 +15,7 @@ export interface HandlerContext {
 		ws: (action: string, sessionId: string, payload: any) => void;
 	};
 	server: Bun.Server;
-	queueManager: any;
+	queueManager: QueueManager;
 }
 
 export type Handler = (context: HandlerContext) => Promise<void>;

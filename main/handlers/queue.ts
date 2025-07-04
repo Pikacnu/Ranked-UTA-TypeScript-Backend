@@ -19,17 +19,10 @@ export const handler: Handler = async ({
 	const { payload } = message;
 
 	if (!payload?.queue || !payload.queue.queue_name) {
-		logger.warn('Queue join failed', {
-			reason: 'Queue name is required',
-		});
 		throw new WebSocketError('Queue name is required');
 	}
 
 	if (!QueueNameToSize[payload.queue.queue_name]) {
-		logger.warn('Queue join failed', {
-			queueName: payload.queue.queue_name,
-			reason: 'Queue not found',
-		});
 		throw new WebSocketError(`Queue ${payload.queue.queue_name} not found`);
 	}
 

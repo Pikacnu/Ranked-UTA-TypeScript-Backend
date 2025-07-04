@@ -157,7 +157,7 @@ export class PartyMatchmaker {
 						bestI = i;
 						bestJ = i + 1;
 					}
-				}
+				}	
 
 				if (bestI < 0 || bestDiff > PartyMatchmaker.MAX_DIFF) break;
 

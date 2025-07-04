@@ -1,3 +1,5 @@
+import db, { partyTable } from '#/db';
+import { eq } from 'drizzle-orm/sqlite-core/expressions';
 import {
 	QueueNameToSize,
 	SizeToQueueName,
@@ -33,7 +35,7 @@ export const handler: Handler = async ({
 	let partyToRemove: PartyData | undefined;
 	let isRemoved = false;
 
-	Object.values(QueueNameToSize).forEach((queueCount) => {
+	Object.values(QueueNameToSize).forEach(async (queueCount) => {
 		if (isRemoved) return;
 		const allPartiesInQueue = queueManager.getCandidates(queueCount || 1);
 		partyToRemove = allPartiesInQueue.find(
@@ -49,10 +51,13 @@ export const handler: Handler = async ({
 				partyId: partyToRemove.partyId,
 				queueName: SizeToQueueName[queueCount],
 			});
+
 			isRemoved = true;
 		}
 		return;
 	});
+
+	console.log(partyToRemove);
 
 	if (isRemoved) {
 		ws.send(

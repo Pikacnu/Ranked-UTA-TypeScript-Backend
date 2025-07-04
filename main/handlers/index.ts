@@ -52,8 +52,6 @@ export async function handleMessage(context: HandlerContext): Promise<boolean> {
 	if (!handler) {
 		logger.warn('Unknown action received', {
 			action,
-			availableActions: Object.keys(handlers),
-			handlerFiles: handlerFiles,
 		});
 		return false;
 	}

@@ -62,12 +62,10 @@ export const calculateTwoTeamAfterGameRating = (
 	team2: GamePlayer[],
 	isTeam1Win: boolean,
 ): { team1Rating: number; team2Rating: number } => {
-	const team1Rating = calculateAverageRating(
-		team1.map((player) => player.score),
-	);
-	const team2Rating = calculateAverageRating(
-		team2.map((player) => player.score),
-	);
+	const team1Rating =
+		calculateAverageRating(team1.map((player) => player.score)) / team1.length;
+	const team2Rating =
+		calculateAverageRating(team2.map((player) => player.score)) / team2.length;
 
 	const team1ExpectedScore = calculateExpectedScore(team1Rating, team2Rating);
 	const team2ExpectedScore = calculateExpectedScore(team2Rating, team1Rating);

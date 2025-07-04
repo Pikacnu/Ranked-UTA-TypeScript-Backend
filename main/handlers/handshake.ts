@@ -1,4 +1,5 @@
-import { Action, WebSocketError } from '../../types';
+import { Status } from 'discord.js';
+import { Action, status, WebSocketError } from '../../types';
 import type { Handler } from './types';
 
 export const action = Action.handshake;
@@ -17,14 +18,13 @@ export const handler: Handler = async ({ ws, message, client, logger }) => {
 		});
 		return;
 	}
-
 	if (
 		payload.handshake.sessionId &&
 		payload.handshake.sessionId !== sessionId
 	) {
+		logger.info('Client session ID updated');
 		ws.unsubscribe(client.clientId);
 		ws.subscribe(payload.handshake.sessionId);
-		logger.info('Client session ID updated');
 		client.clientId = payload.handshake.sessionId;
 	}
 	client.serverIP = payload.handshake.serverIP;

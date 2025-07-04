@@ -53,7 +53,9 @@ const logger = {
 	},
 };
 
-const matchedWaitingQueue: MatchResult[] = [];
+const matchedWaitingQueue: (MatchResult & {
+	id: number;
+})[] = [];
 let clients: Server[] = [];
 
 function newClient() {
@@ -254,7 +256,17 @@ const heartbeat = setInterval(() => {
 
 // Matchmaking loop
 setInterval(() => {
-	const matchResults: MatchResult[] = matchmaker.matchAllQueues();
+	const matchResults: (MatchResult & {
+		id: number;
+	})[] = [...matchedWaitingQueue, ...matchmaker.matchAllQueues()].map(
+		(result, index) =>
+			({
+				...result,
+				id: Date.now() + index, // Assign a unique ID to each match result
+			} as MatchResult & {
+				id: number;
+			}),
+	);
 	if (matchResults.length === 0) {
 		//logger.debug('No matches found in any queues');
 		return;
@@ -273,6 +285,13 @@ setInterval(() => {
 	pendingServers.forEach((gameServer) => {
 		const result =
 			matchResults[Math.floor(Math.random() * matchResults.length)];
+
+		if (matchResults.some((r) => r.id === result.id)) {
+			matchedWaitingQueue.splice(
+				matchedWaitingQueue.findIndex((r) => r.id === result.id),
+				1,
+			);
+		}
 
 		logger.info('Match found', {
 			queueSize: result.queueSize,
