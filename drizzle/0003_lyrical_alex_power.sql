@@ -1,0 +1,1 @@
+ALTER TABLE `game` RENAME COLUMN "event_data" TO "eventData";

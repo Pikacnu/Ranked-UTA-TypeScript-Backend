@@ -62,19 +62,10 @@ function newClient() {
 		clientId,
 		lastHeartbeat: Date.now(),
 		status: ServerStatus.pending,
+		isLobby: false, // Default to false, can be updated later
+		serverIP: '', // Placeholder, will be set during handshake
+		serverPort: 0, // Placeholder, will be set during handshake
 	});
-	const HandshakeCheck = (sessionId: string) => {
-		const client = clients.find((c) => c.clientId === sessionId);
-		if (client === undefined || client.isLobby === undefined) {
-			logger.warn(`Client handshake timeout`, {
-				sessionId,
-				reason: 'Client not found or isLobby undefined',
-			});
-			clients = clients.filter((c) => c.clientId !== sessionId);
-			return;
-		}
-	};
-	setTimeout(HandshakeCheck.bind(null, clientId), 10 * 1000);
 	return clientId;
 }
 
@@ -96,8 +87,8 @@ const server = Bun.serve({
 	websocket: {
 		open(ws) {
 			logger.info('WebSocket connection opened');
-			const sessionId = newClient();
 			ws.subscribe('heartbeat');
+			const sessionId = newClient();
 			ws.subscribe(sessionId);
 			ws.send(
 				JSON.stringify({
@@ -316,7 +307,8 @@ setInterval(() => {
 		// Notify the server about the match
 		clients
 			.filter((c) => c.isLobby)
-			.forEach((client) =>
+			.forEach((client) => {
+				// Notify the client about the match
 				server.publish(
 					client.clientId,
 					JSON.stringify({
@@ -340,8 +332,30 @@ setInterval(() => {
 							},
 						},
 					}),
-				),
-			);
+				);
+				// Notify the client about the transfer
+				server.publish(
+					client.clientId,
+					JSON.stringify({
+						status: status.success,
+						action: Action.transfer,
+						payload: {
+							transferData: {
+								targetServer: gameServer.serverIP,
+								targetPort: gameServer.serverPort,
+								uuids: [
+									...result.teamA.flatMap((party) =>
+										party.partyMembers.map((member) => member.uuid),
+									),
+									...result.teamB.flatMap((party) =>
+										party.partyMembers.map((member) => member.uuid),
+									),
+								],
+							},
+						},
+					}),
+				);
+			});
 
 		gameServer.status = ServerStatus.started;
 		gameServer.game = {
@@ -375,30 +389,32 @@ setInterval(() => {
 			),
 		};
 
-		db.insert(gameTable).values({
-			id: gameServer.game?.id,
-			status: gameServer.game.status,
-			teamData: [
-				{
-					uuids: result.teamA.flatMap((party) =>
-						party.partyMembers.map((member) => member.uuid),
-					),
-					team_score: 0,
-				},
-				{
-					uuids: result.teamB.flatMap((party) =>
-						party.partyMembers.map((member) => member.uuid),
-					),
-					team_score: 0,
-				},
-			],
-			gameType: gameServer.game.type,
-			startTime: new Date().getTime(),
-		});
+		db.insert(gameTable)
+			.values({
+				id: gameServer.game?.id,
+				status: gameServer.game.status,
+				teamData: [
+					{
+						uuids: result.teamA.flatMap((party) =>
+							party.partyMembers.map((member) => member.uuid),
+						),
+						team_score: 0,
+					},
+					{
+						uuids: result.teamB.flatMap((party) =>
+							party.partyMembers.map((member) => member.uuid),
+						),
+						team_score: 0,
+					},
+				],
+				gameType: gameServer.game.type,
+				startTime: new Date().getTime(),
+			})
+			.execute();
 		logger.info('Game started', { gameId: gameServer?.game?.id });
 	});
 	logger.info('Matchmaking completed', JSON.stringify(clients, null, 2));
-}, 20 * 1000);
+}, 5 * 1000);
 
 process.on('SIGINT', () => {
 	clearInterval(heartbeat);

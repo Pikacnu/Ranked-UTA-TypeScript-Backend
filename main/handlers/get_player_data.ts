@@ -36,7 +36,7 @@ export const handler: Handler = async ({ ws, message, logger }) => {
 		const playerData = {
 			uuid: playerUuid,
 			minecraftId: playerMinecraftId,
-			score: 0,
+			score: 1000,
 			isInParty: false,
 			partyId: undefined,
 			isInQueue: false,
@@ -58,7 +58,7 @@ export const handler: Handler = async ({ ws, message, logger }) => {
 			deathCount: 0,
 			killCount: 0,
 			gameCount: 0,
-			rankScore: 0,
+			rankScore: 1000,
 		});
 		return;
 	}

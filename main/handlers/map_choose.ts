@@ -22,7 +22,7 @@ export const handler: Handler = async ({ message, client }) => {
 			.set({
 				mapId: mapId,
 			})
-			.where(eq(gameTable.id, client.game.id));
+			.where(eq(gameTable.id, client.game.id)).execute();
 	} else {
 		throw new WebSocketError('No game to choose map for');
 	}

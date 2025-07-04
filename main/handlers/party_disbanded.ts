@@ -21,7 +21,10 @@ export const handler: Handler = async ({ ws, message, logger }) => {
 			.execute();
 
 		if (existingParty.length > 0) {
-			await db.delete(partyTable).where(eq(partyTable.id, disbandPartyId));
+			await db
+				.delete(partyTable)
+				.where(eq(partyTable.id, disbandPartyId))
+				.execute();
 			ws.send(
 				JSON.stringify({
 					status: status.success,

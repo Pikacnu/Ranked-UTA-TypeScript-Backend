@@ -24,9 +24,10 @@ export const handler: Handler = async ({ message, client }) => {
 	await db
 		.update(gameTable)
 		.set({
-			eventData: sql`JSON_ARRAY_APPEND(COALESCE(eventData, JSON_ARRAY()), '$', ${JSON.stringify(
+			eventData: sql`json_insert(COALESCE(eventData, json_array()), '$[#]', ${JSON.stringify(
 				damageData,
 			)})`,
 		})
-		.where(eq(gameTable.id, client?.game?.id || ''));
+		.where(eq(gameTable.id, client?.game?.id || ''))
+		.execute();
 };

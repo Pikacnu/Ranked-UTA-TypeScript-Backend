@@ -52,16 +52,19 @@ export const getPlayerDataHandler: Handler = async ({
 				},
 			} as Message),
 		);
-		await db.insert(playerTable).values({
-			uuid: playerUuid || '',
-			minecraftId: playerMinecraftId || '',
-			discordID: '',
-			discordName: '',
-			deathCount: 0,
-			killCount: 0,
-			gameCount: 0,
-			rankScore: 0,
-		});
+		await db
+			.insert(playerTable)
+			.values({
+				uuid: playerUuid || '',
+				minecraftId: playerMinecraftId || '',
+				discordID: '',
+				discordName: '',
+				deathCount: 0,
+				killCount: 0,
+				gameCount: 0,
+				rankScore: 0,
+			})
+			.execute();
 		return;
 	}
 
@@ -74,7 +77,8 @@ export const getPlayerDataHandler: Handler = async ({
 			.set({
 				minecraftId: playerMinecraftId,
 			})
-			.where(eq(playerTable.uuid, playerUuid));
+			.where(eq(playerTable.uuid, playerUuid))
+			.execute();
 	}
 
 	const playerData = {
@@ -113,7 +117,8 @@ export const updatePlayerDataHandler: Handler = async ({ message, logger }) => {
 				killCount: payload?.player?.killCount || 0,
 				gameCount: payload?.player?.gameCount || 0,
 			})
-			.where(eq(playerTable.uuid, updatePlayerUuid));
+			.where(eq(playerTable.uuid, updatePlayerUuid))
+			.execute();
 	} catch (error) {
 		logger.error('Error updating player data', error);
 		throw new WebSocketError('Error updating player data');

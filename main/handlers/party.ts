@@ -31,13 +31,17 @@ export const handler: Handler = async ({ ws, message, logger }) => {
 					holder: partyLeaderUUID,
 					players: partyMembers,
 				})
-				.where(eq(partyTable.id, partyId));
+				.where(eq(partyTable.id, partyId))
+				.execute();
 		} else {
-			await db.insert(partyTable).values({
-				id: partyId,
-				holder: partyLeaderUUID,
-				players: partyMembers,
-			});
+			await db
+				.insert(partyTable)
+				.values({
+					id: partyId,
+					holder: partyLeaderUUID,
+					players: partyMembers,
+				})
+				.execute();
 		}
 		ws.send(
 			JSON.stringify({

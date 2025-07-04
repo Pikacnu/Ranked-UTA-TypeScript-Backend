@@ -13,7 +13,7 @@ export interface HandlerContext {
 		debug: (message: string, data?: any) => void;
 		ws: (action: string, sessionId: string, payload: any) => void;
 	};
-	server: any;
+	server: Bun.Server;
 	queueManager: any;
 }
 

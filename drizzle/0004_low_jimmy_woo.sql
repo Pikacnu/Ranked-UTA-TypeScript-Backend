@@ -1,0 +1,1 @@
+ALTER TABLE `game` ADD `ban_character` text;

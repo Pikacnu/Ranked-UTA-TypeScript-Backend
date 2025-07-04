@@ -19,7 +19,7 @@ export const handler: Handler = async ({ ws, message, client, logger }) => {
 		throw new WebSocketError('Player online status is required');
 	}
 	if (!client || !client.game) {
-		throw new WebSocketError('Client or game not found');
+		return;
 	}
 
 	logger.info('Updating player online status', {
@@ -50,15 +50,15 @@ export const handler: Handler = async ({ ws, message, client, logger }) => {
 				payload: {
 					teamData: [
 						{
-							uuids: client.game.players
+							names: client.game.players
 								.filter((p) => p.isTeam1)
-								.flatMap((p) => p.uuid),
+								.flatMap((p) => p.minecraftId),
 							team: 1,
 						},
 						{
-							uuids: client.game.players
+							names: client.game.players
 								.filter((p) => !p.isTeam1)
-								.flatMap((p) => p.uuid),
+								.flatMap((p) => p.minecraftId),
 							team: 2,
 						},
 					],
@@ -80,7 +80,9 @@ export const handler: Handler = async ({ ws, message, client, logger }) => {
 										client.game.players.map((p) => p.score),
 									) || 0,
 							  )
-					},banRuleType:1,enableSameChar:1,enableNewSkill:0}`,
+					},banRuleType:1,enableSameChar:1,enableNewSkill:0,enableNewWillSystem:${
+						QueueNameToSize[client.game.type] === 1 ? 0 : 1
+					}}`,
 				},
 			}),
 		);

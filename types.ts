@@ -10,6 +10,7 @@ export enum Action {
 
 	player_info = 'player_info',
 	output_win = 'output_win',
+	game_state = 'game_state',
 
 	party = 'party',
 	queue = 'queue',
@@ -58,6 +59,8 @@ export type Server = {
 	isLobby?: boolean;
 	status: ServerStatus;
 	game?: Game;
+	serverIP: string;
+	serverPort: number;
 	[key: string]: any;
 };
 
@@ -80,7 +83,7 @@ export type Message = {
 		data?: any;
 		request_target?: string;
 		team_data?: {
-			uuids: string[];
+			names: string[];
 			team_score: number;
 		}[];
 		queue?: {
@@ -102,8 +105,11 @@ export type Message = {
 			partyLeaderUUID: string;
 			partyMembers: PartyPlayer[];
 		};
-		lobby?: {
+		handshake?: {
 			isLobby: boolean;
+			sessionId?: string;
+			serverIP: string;
+			serverPort: number;
 		};
 		whilelist?: {
 			players: {
@@ -189,6 +195,23 @@ enum char {
 	Mad_Dummy = 15,
 }
 
+export const NumberToChar: Record<number, string> = {
+	1: 'Sans',
+	2: 'Papyrus',
+	3: 'Undyne',
+	4: 'Frisk',
+	5: 'Flowey',
+	6: 'Mettaton',
+	7: 'Muffet',
+	8: 'Chara',
+	9: 'Toriel',
+	10: 'Asgore',
+	11: 'Asriel',
+	13: 'Alphys',
+	14: 'Napstablook',
+	15: 'Mad_Dummy',
+};
+
 export type QueueName = 'solo' | 'duo' | 'trio' | 'squad';
 
 export const SizeToQueueName: Record<number, string> = {
@@ -248,3 +271,8 @@ export const UUIDStringToArray = (uuid: string): number[] =>
 		.replace(/]/g, '')
 		.split(',')
 		.map((v) => parseInt(v, 10));
+
+export const MinecraftNbtProcessToJson = (data: string): any =>
+	data
+		.replaceAll(/I;/g, '')
+		.replaceAll(/[A-Za-z]+/gm, (m) => (['float'].includes(m) ? m : `"${m}"`));

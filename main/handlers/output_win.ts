@@ -1,10 +1,11 @@
 import { eq, sql } from 'drizzle-orm';
-import db, { playerTable } from '../../src/db';
+import db, { gameTable, playerTable } from '../../src/db';
 import {
 	Action,
 	WebSocketError,
 	UUIDFromArray,
 	UUIDStringToArray,
+	MinecraftNbtProcessToJson,
 } from '../../types';
 import { calculateTwoTeamAfterGameRating } from '../rank';
 import type { Handler } from './types';
@@ -19,18 +20,18 @@ export const handler: Handler = async ({ message, client, logger }) => {
 	}
 
 	try {
-		const winData = JSON.parse(payload.data);
-		const { Win, Lose } = winData;
-		if (!Win || !Lose) {
+		console.log(MinecraftNbtProcessToJson(payload.data.data[0]));
+		const winData = JSON.parse(MinecraftNbtProcessToJson(payload.data.data[0]));
+		const { win, lose } = winData;
+		if (!win || !lose) {
 			throw new WebSocketError('Win and Lose data are required');
 		}
 
-		const winPlayers = Win.map((p: any) => ({
-			uuid: UUIDFromArray(UUIDStringToArray(p.UUID || '')),
-		}));
-		const losePlayers = Lose.map((p: any) => ({
-			uuid: UUIDFromArray(UUIDStringToArray(p.UUID || '')),
-		}));
+		const winPlayers = win.map((uuid: number[]) => UUIDFromArray(uuid));
+		/*
+		const losePlayers = lose.map((p: any) => ({
+			uuid: UUIDFromArray(p.UUID || ''),
+		}));*/
 
 		if (!client?.game?.id) {
 			throw new WebSocketError('No game to process win data');
@@ -73,7 +74,7 @@ export const handler: Handler = async ({ message, client, logger }) => {
 				await tx
 					.update(playerTable)
 					.set({
-						rankScore: newRankScore,
+						rankScore: newRankScore < 0 ? 0 : newRankScore,
 						gameCount: sql`gameCount + 1`,
 						killCount: sql`killCount + ${isWinner ? 1 : 0}`,
 						deathCount: sql`deathCount + ${isWinner ? 0 : 1}`,
@@ -84,6 +85,18 @@ export const handler: Handler = async ({ message, client, logger }) => {
 					.where(eq(playerTable.uuid, player.uuid));
 			}
 		});
+
+		await db
+			.update(gameTable)
+			.set({
+				winTeam: isTeam1Win ? 1 : 2,
+				endTime: Date.now(),
+				eventData: sql`json_insert(COALESCE(eventData, json_array()), '$[#]', ${JSON.stringify(
+					winData,
+				)})`,
+			})
+			.where(eq(gameTable.id, client.game.id))
+			.execute();
 	} catch (error) {
 		logger.error('Error processing win data', error);
 		throw new WebSocketError('Error processing win data');

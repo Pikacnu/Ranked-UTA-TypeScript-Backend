@@ -22,7 +22,8 @@ export const handler: Handler = async ({ message, logger }) => {
 				killCount: payload?.player?.killCount || 0,
 				gameCount: payload?.player?.gameCount || 0,
 			})
-			.where(eq(playerTable.uuid, updatePlayerUuid));
+			.where(eq(playerTable.uuid, updatePlayerUuid))
+			.execute();
 	} catch (error) {
 		logger.error('Error updating player data', error);
 		throw new WebSocketError('Error updating player data');

@@ -3,6 +3,7 @@ import db, { gameTable } from '../../src/db';
 import {
 	Action,
 	GameStatus,
+	MinecraftNbtProcessToJson,
 	ServerStatus,
 	status,
 	WebSocketError,
@@ -22,17 +23,50 @@ export const handler: Handler = async ({ ws, message, client, logger }) => {
 	}
 
 	try {
-		const statusData = payload.data as unknown as {
-			status: GameStatus;
-		};
-		const gameStatus = statusData.status;
+		const statusData = payload.data as unknown as
+			| {
+					status: GameStatus;
+			  }
+			| {
+					storage: string;
+					key: string;
+					data: string[];
+			  };
+		if (
+			'storage' in statusData &&
+			'key' in statusData &&
+			'data' in statusData
+		) {
+			statusData as {
+				storage: string;
+				key: string;
+				data: string[];
+			};
+			const data = JSON.parse(MinecraftNbtProcessToJson(statusData.data[0]));
+			const banCharacter: number[] = data?.ban;
+			const map: number = data?.map;
+			if (client?.game?.id) {
+				await db
+					.update(gameTable)
+					.set({
+						banCharacter: banCharacter,
+						mapId: map,
+						status: GameStatus.idle,
+					})
+					.where(eq(gameTable.id, client.game.id))
+					.execute();
+			}
+			return;
+		}
+		const gameStatus = (statusData as { status: GameStatus }).status;
 		if (client?.game?.id) {
 			await db
 				.update(gameTable)
 				.set({
 					status: gameStatus,
 				})
-				.where(eq(gameTable.id, client.game.id));
+				.where(eq(gameTable.id, client.game.id))
+				.execute();
 		} else {
 			throw new WebSocketError('No game to update status');
 		}

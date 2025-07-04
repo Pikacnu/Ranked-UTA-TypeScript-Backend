@@ -35,8 +35,9 @@ export const gameTable = sqliteTable('game', {
 	>(),
 	gameType: text().notNull().$type<QueueName>(),
 	mapId: int('map_id'),
+	banCharacter: text('ban_character', { mode: 'json' }).$type<number[]>(),
 	startTime: int(),
 	endTime: int(),
 	winTeam: int('win_team').default(-1),
-	eventData: text('event_data', { mode: 'json' }).$type<Message>(),
+	eventData: text('eventData', { mode: 'json' }).$type<Message>(),
 });
