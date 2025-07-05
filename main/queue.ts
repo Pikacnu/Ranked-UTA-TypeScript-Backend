@@ -149,15 +149,17 @@ export class PartyMatchmaker {
 				let bestI = -1;
 				let bestJ = -1;
 
-				// 找到分差最小的兩隊
+				// 找到分差最小的兩隊（檢查所有可能的配對組合）
 				for (let i = 0; i < fullTeams.length - 1; i++) {
-					const diff = MatchUtils.diff(fullTeams[i], fullTeams[i + 1]);
-					if (diff < bestDiff) {
-						bestDiff = diff;
-						bestI = i;
-						bestJ = i + 1;
+					for (let j = i + 1; j < fullTeams.length; j++) {
+						const diff = MatchUtils.diff(fullTeams[i], fullTeams[j]);
+						if (diff < bestDiff) {
+							bestDiff = diff;
+							bestI = i;
+							bestJ = j;
+						}
 					}
-				}	
+				}
 
 				if (bestI < 0 || bestDiff > PartyMatchmaker.MAX_DIFF) break;
 
@@ -182,27 +184,32 @@ export class PartyMatchmaker {
 		const candidates = [...this.queueManager.getCandidates(N)];
 		candidates.sort((a, b) => MatchUtils.avgScore(a) - MatchUtils.avgScore(b));
 
-		const buffer: PartyData[] = [];
-		let currentSize = 0;
-		let i = 0;
+		while (candidates.length > 0) {
+			const buffer: PartyData[] = [];
+			let currentSize = 0;
+			let foundMatch = false;
 
-		while (i < candidates.length) {
-			const party = candidates[i];
-			const partySize = party.partyMembers.length;
+			for (let i = 0; i < candidates.length; i++) {
+				const party = candidates[i];
+				const partySize = party.partyMembers.length;
 
-			if (currentSize + partySize <= N) {
-				buffer.push(party);
-				currentSize += partySize;
-				candidates.splice(i, 1); // 移除已使用的候選者
-			} else {
-				i++;
+				if (currentSize + partySize <= N) {
+					buffer.push(party);
+					currentSize += partySize;
+					candidates.splice(i, 1);
+					i--; // 調整索引，因為數組已縮短
+					foundMatch = true;
+
+					if (currentSize === N) {
+						teams.push([...buffer]);
+						break;
+					}
+				}
 			}
 
-			if (currentSize === N) {
-				teams.push([...buffer]);
-				buffer.length = 0;
-				currentSize = 0;
-				i = 0; // 重新開始搜索
+			// 如果沒有找到任何匹配或無法組成完整隊伍，則停止
+			if (!foundMatch || currentSize < N) {
+				break;
 			}
 		}
 

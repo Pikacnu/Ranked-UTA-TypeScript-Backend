@@ -40,7 +40,7 @@ export const getPlayerDataHandler: Handler = async ({
 		const playerData = {
 			uuid: playerUuid,
 			minecraftId: playerMinecraftId,
-			score: 0,
+			score: scoreDefault,
 			isInParty: false,
 			partyId: undefined,
 			isInQueue: false,

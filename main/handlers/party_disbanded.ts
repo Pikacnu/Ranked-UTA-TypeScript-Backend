@@ -14,29 +14,19 @@ export const handler: Handler = async ({ ws, message, logger }) => {
 
 	const disbandPartyId = payload.party.partyId;
 	try {
-		const existingParty = await db
-			.select()
-			.from(partyTable)
+		await db
+			.delete(partyTable)
 			.where(eq(partyTable.id, disbandPartyId))
 			.execute();
-
-		if (existingParty.length > 0) {
-			await db
-				.delete(partyTable)
-				.where(eq(partyTable.id, disbandPartyId))
-				.execute();
-			ws.send(
-				JSON.stringify({
-					status: status.success,
-					action: Action.party_disbanded,
-					payload: {
-						message: 'Party disbanded successfully',
-					},
-				}),
-			);
-		} else {
-			throw new WebSocketError('Party not found');
-		}
+		ws.send(
+			JSON.stringify({
+				status: status.success,
+				action: Action.party_disbanded,
+				payload: {
+					message: 'Party disbanded successfully',
+				},
+			}),
+		);
 	} catch (error) {
 		logger.error('Error disbanding party', error);
 		throw new WebSocketError('Error disbanding party');

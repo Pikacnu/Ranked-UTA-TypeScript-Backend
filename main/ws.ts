@@ -267,8 +267,9 @@ setInterval(() => {
 				id: number;
 			}),
 	);
+
 	if (matchResults.length === 0) {
-		//logger.debug('No matches found in any queues');
+		logger.debug('No matches found in any queues');
 		return;
 	}
 
@@ -285,7 +286,12 @@ setInterval(() => {
 	pendingServers.forEach((gameServer) => {
 		const result =
 			matchResults[Math.floor(Math.random() * matchResults.length)];
-
+		if (!result) {
+			logger.warn('No match result found for server', {
+				serverId: gameServer.clientId,
+			});
+			return;
+		}
 		if (matchResults.some((r) => r.id === result.id)) {
 			matchedWaitingQueue.splice(
 				matchedWaitingQueue.findIndex((r) => r.id === result.id),

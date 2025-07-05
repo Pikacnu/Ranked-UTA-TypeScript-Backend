@@ -20,9 +20,7 @@ export const playerTable = sqliteTable('player', {
 
 export const partyTable = sqliteTable('party', {
 	id: int().notNull().primaryKey(),
-	holder: text()
-		.notNull()
-		.references(() => playerTable.uuid),
+	holder: text().notNull(),
 	players: text('players', { mode: 'json' }).notNull().$type<PartyPlayer[]>(),
 	isInQueue: int('is_in_queue').default(0),
 });
