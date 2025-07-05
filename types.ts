@@ -74,6 +74,19 @@ export enum status {
 	error = 0,
 }
 
+export type PlayerData = {
+	uuid?: string;
+	minecraftId?: string;
+	deathCount?: number;
+	killCount?: number;
+	gameCount?: number;
+	partyId?: number;
+	isInParty?: boolean;
+	isInQueue?: boolean;
+	isOnline?: boolean;
+	score: number;
+};
+
 export type Message = {
 	action: Action;
 	sessionId?: string;
@@ -91,15 +104,7 @@ export type Message = {
 			uuid?: string;
 			parties?: PartyData[][];
 		};
-		player?: {
-			uuid?: string;
-			minecraftId?: string;
-			deathCount?: number;
-			killCount?: number;
-			gameCount?: number;
-			isInParty?: boolean;
-			isOnline?: boolean;
-		};
+		player?: PlayerData;
 		party?: {
 			partyId: number;
 			partyLeaderUUID: string;
@@ -212,13 +217,13 @@ export const NumberToChar: Record<number, string> = {
 	15: 'Mad_Dummy',
 };
 
-export type QueueName = 'solo' | 'duo' | 'trio' | 'squad';
+export type QueueName = 'solo' | 'duo' | 'trio' | 'siege';
 
 export const SizeToQueueName: Record<number, string> = {
 	1: 'solo',
 	2: 'duo',
 	3: 'trio',
-	4: 'squad',
+	4: 'siege',
 };
 
 export const QueueNameToSize: Record<string, number> = {

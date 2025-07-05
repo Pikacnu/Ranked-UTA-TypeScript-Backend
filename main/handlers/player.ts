@@ -3,6 +3,8 @@ import db, { playerTable, partyTable } from '../../src/db';
 import { Action, status, WebSocketError, type Message } from '../../types';
 import type { Handler } from './types';
 
+const scoreDefault = 1000;
+
 export const getPlayerDataHandler: Handler = async ({
 	ws,
 	message,
@@ -62,7 +64,7 @@ export const getPlayerDataHandler: Handler = async ({
 				deathCount: 0,
 				killCount: 0,
 				gameCount: 0,
-				rankScore: 0,
+				rankScore: scoreDefault,
 			})
 			.execute();
 		return;

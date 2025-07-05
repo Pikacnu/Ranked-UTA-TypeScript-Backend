@@ -7,7 +7,13 @@ import {
 	UUIDStringToArray,
 	MinecraftNbtProcessToJson,
 } from '../../types';
-import { calculateTwoTeamAfterGameRating } from '../rank';
+import {
+	calculateAverageRating,
+	calculateExpectedScore,
+	calculateNewRating,
+	calculateTwoTeamAfterGameRating,
+	getK,
+} from '../rank';
 import type { Handler } from './types';
 
 export const action = Action.output_win;
@@ -57,20 +63,33 @@ export const handler: Handler = async ({ message, client, logger }) => {
 		}
 
 		// Update player stats
-		const RankScore = calculateTwoTeamAfterGameRating(Team1, Team2, isTeam1Win);
+		const team1Rating = calculateAverageRating(
+			Team1.map((player) => player.score),
+		);
+		const team2Rating = calculateAverageRating(
+			Team2.map((player) => player.score),
+		);
+
+		const team1ExpectedScore = calculateExpectedScore(team1Rating, team2Rating);
+		const team2ExpectedScore = calculateExpectedScore(team2Rating, team1Rating);
+
+		const team1ActualScore = isTeam1Win ? 1 : 0;
+		const team2ActualScore = isTeam1Win ? 0 : 1;
+		const team1K = getK(team1Rating);
+		const team2K = getK(team2Rating);
 
 		await db.transaction(async (tx) => {
 			if (!client.game?.players) {
 				throw new WebSocketError('No players in game to update');
 			}
-			if (!RankScore || Object.keys(RankScore).length === 0) {
-				throw new WebSocketError('No rank score data to update');
-			}
 			for (const player of client.game.players) {
 				const isWinner = isTeam1Win ? player.isTeam1 : !player.isTeam1;
-				const newRankScore =
-					player.score +
-					(player.isTeam1 ? RankScore.team1Rating : RankScore.team2Rating || 0);
+				const newRankScore = calculateNewRating(
+					player.score,
+					player.isTeam1 ? team1ExpectedScore : team2ExpectedScore,
+					player.isTeam1 ? team1ActualScore : team2ActualScore,
+					player.isTeam1 ? team1K : team2K,
+				);
 				await tx
 					.update(playerTable)
 					.set({

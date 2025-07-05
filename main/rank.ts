@@ -61,11 +61,16 @@ export const calculateTwoTeamAfterGameRating = (
 	team1: GamePlayer[],
 	team2: GamePlayer[],
 	isTeam1Win: boolean,
-): { team1Rating: number; team2Rating: number } => {
-	const team1Rating =
-		calculateAverageRating(team1.map((player) => player.score)) / team1.length;
-	const team2Rating =
-		calculateAverageRating(team2.map((player) => player.score)) / team2.length;
+): {
+	team1: GamePlayer[];
+	team2: GamePlayer[];
+} => {
+	const team1Rating = calculateAverageRating(
+		team1.map((player) => player.score),
+	);
+	const team2Rating = calculateAverageRating(
+		team2.map((player) => player.score),
+	);
 
 	const team1ExpectedScore = calculateExpectedScore(team1Rating, team2Rating);
 	const team2ExpectedScore = calculateExpectedScore(team2Rating, team1Rating);
@@ -74,22 +79,32 @@ export const calculateTwoTeamAfterGameRating = (
 	const team2ActualScore = isTeam1Win ? 0 : 1;
 	const team1K = getK(team1Rating);
 	const team2K = getK(team2Rating);
-	const newTeam1Rating = calculateNewRating(
-		team1Rating,
-		team1ExpectedScore,
-		team1ActualScore,
-		team1K,
+	const newTeam1Rating = team1.map((player) =>
+		calculateNewRating(
+			player.score,
+			team1ExpectedScore,
+			team1ActualScore,
+			team1K,
+		),
 	);
-	const newTeam2Rating = calculateNewRating(
-		team2Rating,
-		team2ExpectedScore,
-		team2ActualScore,
-		team2K,
+	const newTeam2Rating = team2.map((player) =>
+		calculateNewRating(
+			player.score,
+			team2ExpectedScore,
+			team2ActualScore,
+			team2K,
+		),
 	);
 
 	return {
-		team1Rating: newTeam1Rating,
-		team2Rating: newTeam2Rating,
+		team1: team1.map((player, index) => ({
+			...player,
+			score: newTeam1Rating[index],
+		})),
+		team2: team2.map((player, index) => ({
+			...player,
+			score: newTeam2Rating[index],
+		})),
 	};
 };
 
