@@ -81,7 +81,8 @@ export const handler: Handler = async ({ ws, message, client, logger }) => {
 									) || 0,
 							  )
 					},banRuleType:1,enableSameChar:1,enableNewSkill:0,enableNewWillSystem:${
-						QueueNameToSize[client.game.type] === 1 ? 0 : 1
+						//QueueNameToSize[client.game.type] === 1 ? 0 : 1
+						0
 					}}`,
 				},
 			}),
