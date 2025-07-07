@@ -1,4 +1,4 @@
-import { type PartyData, type PartyPlayer } from '../src/types';
+import { type PartyData, type PartyPlayer } from './types';
 
 /**
  * 工具類：計算平均分與分差

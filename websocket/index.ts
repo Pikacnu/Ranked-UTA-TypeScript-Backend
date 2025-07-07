@@ -11,7 +11,7 @@ import {
 	type PartyData,
 	type QueueName,
 	type Server,
-} from '../src/types';
+} from './types';
 import db, { gameTable } from '../src/db';
 import { QueueManager, PartyMatchmaker, MatchResult } from './queue';
 import { handleMessage } from './handlers';
@@ -27,28 +27,50 @@ const port = 8080;
 const logger = {
 	info: (message: string, data?: any) => {
 		const timestamp = new Date().toISOString();
-		console.log(`[${timestamp}] [INFO] ${message}`, data || '');
+		console.log(
+			`\x1b[90m[${timestamp}]\x1b[0m \x1b[36m${'[INFO]'.padEnd(
+				10,
+			)}\x1b[0m ${message}`,
+			data || '',
+		);
 	},
 	warn: (message: string, data?: any) => {
 		const timestamp = new Date().toISOString();
-		console.warn(`[${timestamp}] [WARN] ${message}`, data || '');
+		console.warn(
+			`\x1b[90m[${timestamp}]\x1b[0m \x1b[33m${'[WARN]'.padEnd(
+				10,
+			)}\x1b[0m ${message}`,
+			data || '',
+		);
 	},
 	error: (message: string, error?: any) => {
 		const timestamp = new Date().toISOString();
-		console.error(`[${timestamp}] [ERROR] ${message}`, error || '');
+		console.error(
+			`\x1b[90m[${timestamp}]\x1b[0m \x1b[31m${'[ERROR]'.padEnd(
+				10,
+			)}\x1b[0m ${message}`,
+			error || '',
+		);
 	},
 	debug: (message: string, data?: any) => {
 		const timestamp = new Date().toISOString();
-		console.log(`[${timestamp}] [DEBUG] ${message}`, data || '');
+		console.log(
+			`\x1b[90m[${timestamp}]\x1b[0m \x1b[35m${'[DEBUG]'.padEnd(
+				10,
+			)}\x1b[0m ${message}`,
+			data || '',
+		);
 	},
 	ws: (action: string, sessionId: string, payload: any) => {
 		const timestamp = new Date().toISOString();
 		const shortId = sessionId?.split('-')[1] || 'unknown';
 		console.log(
-			`[${timestamp}] [WS] ${action.padEnd(
+			`\x1b[90m[${timestamp}]\x1b[0m \x1b[32m${'[WS]'.padEnd(
+				10,
+			)}\x1b[0m \x1b[34m${action.padEnd(
 				20,
 				' ',
-			)} | ${shortId} | ${JSON.stringify(payload)}`,
+			)}\x1b[0m | \x1b[93m${shortId}\x1b[0m | ${JSON.stringify(payload)}`,
 		);
 	},
 };
@@ -269,7 +291,7 @@ setInterval(() => {
 	);
 
 	if (matchResults.length === 0) {
-		logger.debug('No matches found in any queues');
+		//logger.debug('No matches found in any queues');
 		return;
 	}
 

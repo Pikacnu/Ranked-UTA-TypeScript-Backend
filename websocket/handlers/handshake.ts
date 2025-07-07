@@ -1,5 +1,5 @@
 import { Status } from 'discord.js';
-import { Action, status, WebSocketError } from '../../src/types';
+import { Action, status, WebSocketError } from '../types';
 import type { Handler } from './types';
 
 export const action = Action.handshake;

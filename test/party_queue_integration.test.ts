@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'bun:test';
 import db, { partyTable } from '../src/db';
 import { eq } from 'drizzle-orm';
 import { QueueManager } from '../websocket/queue';
-import type { PartyData } from '../src/types';
+import type { PartyData } from '../websocket/types';
 
 describe('Party Queue Integration', () => {
 	const testPartyId = 999998;

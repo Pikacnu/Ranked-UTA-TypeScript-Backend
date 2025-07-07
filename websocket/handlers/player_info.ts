@@ -3,7 +3,7 @@ import {
 	WebSocketError,
 	UUIDFromArray,
 	MinecraftNbtProcessToJson,
-} from '../../src/types';
+} from '../types';
 import type { Handler } from './types';
 
 export const action = Action.player_info;

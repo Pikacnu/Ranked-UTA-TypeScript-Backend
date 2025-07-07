@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm';
 import db, { gameTable } from '../../src/db';
-import { Action, WebSocketError } from '../../src/types';
+import { Action, WebSocketError } from '../types';
 import type { Handler } from './types';
 
 export const action = Action.map_choose;

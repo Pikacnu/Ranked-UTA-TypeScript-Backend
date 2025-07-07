@@ -1,17 +1,36 @@
 import { eq, or, sql } from 'drizzle-orm';
 import db, { playerTable, partyTable } from '../../src/db';
-import { Action, status, WebSocketError, type Message } from '../../src/types';
+import { Action, status, WebSocketError, type Message } from '../types';
 import type { Handler } from './types';
 
 export const action = Action.get_player_data;
 
 export const handler: Handler = async ({ ws, message, logger }) => {
 	const { payload } = message;
-	const playerUuid = payload?.player?.uuid;
+	let playerUuid = payload?.player?.uuid;
 	const playerMinecraftId = payload?.player?.minecraftId;
 
-	if (!playerUuid || playerUuid === '') {
-		throw new WebSocketError('Player UUID is required');
+	if (!playerUuid) {
+		if (!playerMinecraftId) {
+			logger.error('Player UUID or Minecraft ID are missing');
+			ws.sendText(
+				JSON.stringify({
+					status: status.error,
+					action: Action.get_player_data,
+					payload: {
+						message: 'Player UUID or Minecraft ID are required',
+					},
+				} as Message),
+			);
+			return;
+		}
+		playerUuid = (
+			await db
+				.select()
+				.from(playerTable)
+				.where(eq(playerTable.minecraftId, playerMinecraftId))
+				.execute()
+		)[0].uuid;
 	}
 
 	const playerDataFromDB = (
@@ -40,6 +59,9 @@ export const handler: Handler = async ({ ws, message, logger }) => {
 			isInParty: false,
 			partyId: undefined,
 			isInQueue: false,
+			gameCount: 0,
+			deathCount: 0,
+			killCount: 0,
 		};
 		ws.sendText(
 			JSON.stringify({
@@ -82,6 +104,9 @@ export const handler: Handler = async ({ ws, message, logger }) => {
 		isInParty: !!playerDataFromDB.party,
 		partyId: playerDataFromDB.party ? playerDataFromDB.party.id : undefined,
 		isInQueue: false,
+		gameCount: playerDataFromDB.player.gameCount || 0,
+		deathCount: playerDataFromDB.player.deathCount || 0,
+		killCount: playerDataFromDB.player.killCount || 0,
 	};
 	ws.sendText(
 		JSON.stringify({

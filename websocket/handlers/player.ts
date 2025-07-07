@@ -1,6 +1,6 @@
 import { eq, or, sql } from 'drizzle-orm';
 import db, { playerTable, partyTable } from '../../src/db';
-import { Action, status, WebSocketError, type Message } from '../../src/types';
+import { Action, status, WebSocketError, type Message } from '../types';
 import type { Handler } from './types';
 
 const scoreDefault = 1000;

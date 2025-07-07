@@ -1,4 +1,4 @@
-import { Action, status, WebSocketError, type Message } from '../../src/types';
+import { Action, status, WebSocketError, type Message } from '../types';
 import type { Handler } from './types';
 
 export const action = Action.request_data;

@@ -9,7 +9,7 @@ async function loadHandlers() {
 	try {
 		// Manually import each handler file
 		const handlerModules = Array.from(
-			new Glob('./*.ts').scanSync('./main/handlers'),
+			new Glob('./*.ts').scanSync('./websocket/handlers'),
 		).map((file) => ({
 			file: file,
 			module: () => import(file),

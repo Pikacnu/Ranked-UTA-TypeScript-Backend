@@ -1,30 +1,39 @@
 export enum Action {
+	// for websocket communication
 	handshake = 'handshake',
 	heartbeat = 'heartbeat',
 	message = 'message',
 	disconnect = 'disconnect',
 	command = 'command',
+
+	//request actions
 	request_data = 'request_data',
 	get_player_data = 'get_player_data',
 	update_player_data = 'update_player_data',
 
+	// game actions
 	player_info = 'player_info',
 	output_win = 'output_win',
 	game_state = 'game_state',
 
+	// lobby actions
 	party = 'party',
 	queue = 'queue',
 	queue_leave = 'queue_leave',
 	queue_match = 'queue_match',
+	party_disbanded = 'party_disbanded',
+	
+	// game server actions
+	team_join = 'team_join',
 	whitelist_change = 'whitelist_change',
 	game_status = 'game_status',
 	map_choose = 'map_choose',
 	kill = 'kill',
 	damage = 'damage',
-	transfer = 'transfer',
-	party_disbanded = 'party_disbanded',
-	team_join = 'team_join',
+	
+	// minecraft server actions
 	player_online_status = 'player_online_status',
+	transfer = 'transfer',
 }
 
 export enum GameStatus {
@@ -84,7 +93,7 @@ export type PlayerData = {
 	isInParty?: boolean;
 	isInQueue?: boolean;
 	isOnline?: boolean;
-	score: number;
+	score?: number;
 };
 
 export type Message = {

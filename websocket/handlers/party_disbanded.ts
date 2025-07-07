@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm';
 import db, { partyTable } from '../../src/db';
-import { Action, status, WebSocketError } from '../../src/types';
+import { Action, status, WebSocketError } from '../types';
 import type { Handler } from './types';
 
 export const action = Action.party_disbanded;
