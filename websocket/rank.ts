@@ -32,7 +32,7 @@ export const calculateAverageRating = (scores: number[]): number => {
 	const totalScore = scores.reduce((sum, score) => sum + score, 0);
 	return totalScore / scores.length;
 };
-
+/*
 export const getK = (score: number): number => {
 	switch (true) {
 		case score <= 1400:
@@ -43,6 +43,34 @@ export const getK = (score: number): number => {
 			return 16;
 		default:
 			return 8;
+	}
+};*/
+
+export const getK1 = (score: number): number => {
+	switch (true) {
+		case score <= 1400:
+			return 8;
+		case score <= 1800:
+			return 6;
+		case score <= 2200:
+			return 4;
+		default:
+			return 4;
+	}
+};
+
+export const getK2 = (mode: number): number => {
+	switch (mode) {
+		case 1: // Solo
+			return 2;
+		case 2: // Duo
+			return 4;
+		case 3: // Squad
+			return 6;
+		case 4: // Party
+			return 8;
+		default:
+			return 4; // Default K factor for unknown modes
 	}
 };
 

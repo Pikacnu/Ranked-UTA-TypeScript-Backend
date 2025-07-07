@@ -11,8 +11,8 @@ import {
 	calculateAverageRating,
 	calculateExpectedScore,
 	calculateNewRating,
-	calculateTwoTeamAfterGameRating,
-	getK,
+	getK1,
+	getK2,
 } from '../rank';
 import type { Handler } from './types';
 
@@ -79,8 +79,9 @@ export const handler: Handler = async ({ message, client, logger }) => {
 
 		const team1ActualScore = isTeam1Win ? 1 : 0;
 		const team2ActualScore = isTeam1Win ? 0 : 1;
-		const team1K = getK(team1Rating);
-		const team2K = getK(team2Rating);
+		const K2 = getK2(Team1.length === Team2.length ? Team1.length : 0);
+		const team1K = getK1(team1Rating) * K2;
+		const team2K = getK1(team2Rating) * K2;
 
 		// 在單一事務中更新所有數據
 		await db.transaction(async (tx) => {
