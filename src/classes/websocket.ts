@@ -46,6 +46,10 @@ export class WebsocketClient {
 					});
 				}
 
+				if(data.action === Action.output_win){
+					
+				}
+
 				if (
 					data.action !== Action.handshake &&
 					data.action !== Action.heartbeat

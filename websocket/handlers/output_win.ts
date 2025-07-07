@@ -6,6 +6,7 @@ import {
 	UUIDFromArray,
 	UUIDStringToArray,
 	MinecraftNbtProcessToJson,
+	status,
 } from '../types';
 import {
 	calculateAverageRating,
@@ -18,7 +19,7 @@ import type { Handler } from './types';
 
 export const action = Action.output_win;
 
-export const handler: Handler = async ({ message, client, logger }) => {
+export const handler: Handler = async ({ ws, message, client, logger }) => {
 	const { payload } = message;
 
 	if (!payload || !payload.data) {
@@ -56,6 +57,7 @@ export const handler: Handler = async ({ message, client, logger }) => {
 		}
 
 		let isTeam1Win;
+		let isNoTeamWin = false;
 		if (Team1.every((p) => winPlayers.some((wp: string) => wp === p.uuid))) {
 			isTeam1Win = true;
 		} else if (
@@ -63,7 +65,12 @@ export const handler: Handler = async ({ message, client, logger }) => {
 		) {
 			isTeam1Win = false;
 		} else {
-			throw new WebSocketError('Win data does not match game players');
+			isNoTeamWin = true;
+			isTeam1Win = false; // Default to false if no team wins
+			logger.warn('No team won, processing as no team win', {
+				gameId: client.game.id,
+				winPlayers,
+			});
 		}
 
 		// Update player stats
@@ -80,8 +87,32 @@ export const handler: Handler = async ({ message, client, logger }) => {
 		const team1ActualScore = isTeam1Win ? 1 : 0;
 		const team2ActualScore = isTeam1Win ? 0 : 1;
 		const K2 = getK2(Team1.length === Team2.length ? Team1.length : 0);
-		const team1K = getK1(team1Rating) * K2;
-		const team2K = getK1(team2Rating) * K2;
+		const K =
+			getK1(
+				[
+					Team1.reduce((sum, player) => sum + player.score, 0),
+					Team2.reduce((sum, player) => sum + player.score, 0),
+				].reduce((a, b) => a + b, 0) /
+					(Team1.length + Team2.length),
+			) * K2;
+
+		ws.publishText(
+			'Discord-Client',
+			JSON.stringify({
+				status: status.success,
+				action: Action.output_win,
+				payload: {
+					gameId: client.game.id,
+					isTeam1Win,
+					team1: Team1,
+					team2: Team2,
+					team1DeltaScore:
+						K * ((isNoTeamWin ? 0 : isTeam1Win ? 1 : 0) - team1ExpectedScore),
+					team2DeltaScore:
+						K * ((isNoTeamWin ? 0 : isTeam1Win ? 0 : 1) - team2ExpectedScore),
+				},
+			}),
+		);
 
 		// 在單一事務中更新所有數據
 		await db.transaction(async (tx) => {
@@ -92,7 +123,7 @@ export const handler: Handler = async ({ message, client, logger }) => {
 					player.score,
 					player.isTeam1 ? team1ExpectedScore : team2ExpectedScore,
 					player.isTeam1 ? team1ActualScore : team2ActualScore,
-					player.isTeam1 ? team1K : team2K,
+					K,
 				);
 				await tx
 					.update(playerTable)
