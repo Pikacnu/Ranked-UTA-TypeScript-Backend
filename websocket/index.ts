@@ -11,7 +11,7 @@ import {
 	type PartyData,
 	type QueueName,
 	type Server,
-} from '../types';
+} from '../src/types';
 import db, { gameTable } from '../src/db';
 import { QueueManager, PartyMatchmaker, MatchResult } from './queue';
 import { handleMessage } from './handlers';

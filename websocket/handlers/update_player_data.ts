@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm';
 import db, { playerTable } from '../../src/db';
-import { Action, WebSocketError } from '../../types';
+import { Action, WebSocketError } from '../../src/types';
 import type { Handler } from './types';
 
 export const action = Action.update_player_data;

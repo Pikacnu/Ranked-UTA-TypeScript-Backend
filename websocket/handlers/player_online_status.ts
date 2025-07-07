@@ -6,7 +6,7 @@ import {
 	Connection,
 	ConnectionStatusStringToEnum,
 	QueueNameToSize,
-} from '../../types';
+} from '../../src/types';
 import { calculateAverageRating, getRoundByRankScore } from '../rank';
 import type { Handler } from './types';
 

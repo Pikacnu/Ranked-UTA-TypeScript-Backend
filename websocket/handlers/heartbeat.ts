@@ -1,4 +1,4 @@
-import { Action } from '../../types';
+import { Action } from '../../src/types';
 import type { Handler } from './types';
 
 export const action = Action.heartbeat;

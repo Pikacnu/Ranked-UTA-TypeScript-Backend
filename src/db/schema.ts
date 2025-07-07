@@ -4,7 +4,7 @@ import {
 	type Message,
 	type PartyPlayer,
 	GameStatus,
-} from '../../types';
+} from '../types';
 
 export const playerTable = sqliteTable('player', {
 	uuid: text().notNull().primaryKey(),

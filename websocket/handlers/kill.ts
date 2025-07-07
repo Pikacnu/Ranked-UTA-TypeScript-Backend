@@ -1,6 +1,6 @@
 import { eq, sql } from 'drizzle-orm';
 import db, { gameTable } from '../../src/db';
-import { Action, WebSocketError, type KillData } from '../../types';
+import { Action, WebSocketError, type KillData } from '../../src/types';
 import type { Handler } from './types';
 
 export const action = Action.kill;
@@ -48,5 +48,6 @@ export const handler: Handler = async ({ message, client }) => {
 				killData,
 			)})`,
 		})
-		.where(eq(gameTable.id, client?.game?.id || '')).execute();
+		.where(eq(gameTable.id, client?.game?.id || ''))
+		.execute();
 };

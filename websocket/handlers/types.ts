@@ -1,5 +1,5 @@
 import type { ServerWebSocket } from 'bun';
-import type { Message, Server } from '../../types';
+import type { Message, Server } from '../../src/types';
 import type { QueueManager } from '../queue';
 
 export interface HandlerContext {

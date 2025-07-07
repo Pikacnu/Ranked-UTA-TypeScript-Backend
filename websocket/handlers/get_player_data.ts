@@ -1,15 +1,11 @@
 import { eq, or, sql } from 'drizzle-orm';
 import db, { playerTable, partyTable } from '../../src/db';
-import { Action, status, WebSocketError, type Message } from '../../types';
+import { Action, status, WebSocketError, type Message } from '../../src/types';
 import type { Handler } from './types';
 
-const scoreDefault = 1000;
+export const action = Action.get_player_data;
 
-export const getPlayerDataHandler: Handler = async ({
-	ws,
-	message,
-	logger,
-}) => {
+export const handler: Handler = async ({ ws, message, logger }) => {
 	const { payload } = message;
 	const playerUuid = payload?.player?.uuid;
 	const playerMinecraftId = payload?.player?.minecraftId;
@@ -40,7 +36,7 @@ export const getPlayerDataHandler: Handler = async ({
 		const playerData = {
 			uuid: playerUuid,
 			minecraftId: playerMinecraftId,
-			score: scoreDefault,
+			score: 1000,
 			isInParty: false,
 			partyId: undefined,
 			isInQueue: false,
@@ -54,19 +50,16 @@ export const getPlayerDataHandler: Handler = async ({
 				},
 			} as Message),
 		);
-		await db
-			.insert(playerTable)
-			.values({
-				uuid: playerUuid || '',
-				minecraftId: playerMinecraftId || '',
-				discordID: '',
-				discordName: '',
-				deathCount: 0,
-				killCount: 0,
-				gameCount: 0,
-				rankScore: scoreDefault,
-			})
-			.execute();
+		await db.insert(playerTable).values({
+			uuid: playerUuid || '',
+			minecraftId: playerMinecraftId || '',
+			discordID: '',
+			discordName: '',
+			deathCount: 0,
+			killCount: 0,
+			gameCount: 0,
+			rankScore: 1000,
+		});
 		return;
 	}
 
@@ -79,8 +72,7 @@ export const getPlayerDataHandler: Handler = async ({
 			.set({
 				minecraftId: playerMinecraftId,
 			})
-			.where(eq(playerTable.uuid, playerUuid))
-			.execute();
+			.where(eq(playerTable.uuid, playerUuid));
 	}
 
 	const playerData = {
@@ -100,29 +92,4 @@ export const getPlayerDataHandler: Handler = async ({
 			},
 		} as Message),
 	);
-};
-
-export const updatePlayerDataHandler: Handler = async ({ message, logger }) => {
-	const { payload } = message;
-	const updatePlayerUuid = payload?.player?.uuid;
-
-	if (!updatePlayerUuid || updatePlayerUuid === '') {
-		throw new WebSocketError('Player UUID is required');
-	}
-
-	try {
-		await db
-			.update(playerTable)
-			.set({
-				minecraftId: payload?.player?.minecraftId || 'null',
-				deathCount: payload?.player?.deathCount || 0,
-				killCount: payload?.player?.killCount || 0,
-				gameCount: payload?.player?.gameCount || 0,
-			})
-			.where(eq(playerTable.uuid, updatePlayerUuid))
-			.execute();
-	} catch (error) {
-		logger.error('Error updating player data', error);
-		throw new WebSocketError('Error updating player data');
-	}
 };

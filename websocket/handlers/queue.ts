@@ -5,7 +5,7 @@ import {
 	status,
 	WebSocketError,
 	type PartyData,
-} from '../../types';
+} from '../../src/types';
 import type { Handler } from './types';
 
 // 安全的數據庫查詢函數，處理可能損壞的 JSON 數據

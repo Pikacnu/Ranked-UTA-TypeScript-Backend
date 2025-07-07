@@ -6,7 +6,7 @@ import {
 	UUIDFromArray,
 	UUIDStringToArray,
 	MinecraftNbtProcessToJson,
-} from '../../types';
+} from '../../src/types';
 import {
 	calculateAverageRating,
 	calculateExpectedScore,

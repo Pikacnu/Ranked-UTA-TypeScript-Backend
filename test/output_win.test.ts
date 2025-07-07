@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'bun:test';
 import db, { gameTable, playerTable } from '../src/db';
 import { eq } from 'drizzle-orm';
-import type { GamePlayer, Message } from '../types';
+import type { GamePlayer, Message } from '../src/types';
 
 describe('Output Win Handler', () => {
 	const testGameId = 'test-game-win-123';

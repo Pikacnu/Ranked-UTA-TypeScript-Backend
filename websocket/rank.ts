@@ -1,4 +1,4 @@
-import type { GamePlayer } from '../types';
+import type { GamePlayer } from '../src/types';
 import db, { playerTable } from '../src/db';
 import { sql } from 'drizzle-orm';
 

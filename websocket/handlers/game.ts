@@ -7,7 +7,7 @@ import {
 	ServerStatus,
 	status,
 	WebSocketError,
-} from '../../types';
+} from '../../src/types';
 import type { Handler } from './types';
 
 export const action = Action.game_status;

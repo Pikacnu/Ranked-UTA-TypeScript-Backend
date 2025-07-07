@@ -1,6 +1,11 @@
 import { eq } from 'drizzle-orm';
 import db, { partyTable } from '../../src/db';
-import { Action, status, WebSocketError, type PartyPlayer } from '../../types';
+import {
+	Action,
+	status,
+	WebSocketError,
+	type PartyPlayer,
+} from '../../src/types';
 import type { Handler } from './types';
 
 // 數據驗證函數

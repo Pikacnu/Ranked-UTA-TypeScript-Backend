@@ -7,7 +7,7 @@ import {
 	status,
 	WebSocketError,
 	type PartyData,
-} from '../../types';
+} from '../../src/types';
 import type { Handler } from './types';
 
 export const action = Action.queue_leave;

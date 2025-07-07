@@ -1,6 +1,6 @@
 import { eq, sql } from 'drizzle-orm';
 import db, { gameTable } from '../../src/db';
-import { Action, WebSocketError, type DamageData } from '../../types';
+import { Action, WebSocketError, type DamageData } from '../../src/types';
 import type { Handler } from './types';
 
 export const action = Action.damage;
