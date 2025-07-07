@@ -1,6 +1,15 @@
 import type { MesssageQueueEntry } from '#/commands/type';
-import { Action, type Message as WSMessage } from '@/types';
+import { Action, type GamePlayer, type Message as WSMessage } from '@/types';
 import { type Message } from '#/commands/type';
+import {
+	Client,
+	MessageFlags,
+	SeparatorBuilder,
+	SeparatorSpacingSize,
+	TextChannel,
+	TextDisplayBuilder,
+	type GuildTextBasedChannel,
+} from 'discord.js';
 
 export class WebsocketClient {
 	private static client: WebSocket | null = null;
@@ -8,18 +17,20 @@ export class WebsocketClient {
 	private static clientId: string = 'Discord-Client';
 	private static connectUrl: string | null = null;
 	private static reconnectTime = 5000; // 5 seconds
+	private static discordClient: Client | null = null;
 
-	public static initialize(url: string): void {
+	public static initialize(url: string, client: Client): void {
 		if (this.client) {
 			console.warn('WebSocket client is already initialized.');
 			return;
 		}
 		this.client = new WebSocket(url);
+		this.discordClient = client;
 		this.connectUrl = url;
 		this.client.onopen = () => {
 			console.log('WebSocket connection established.');
 		};
-		this.client.onmessage = (event) => {
+		this.client.onmessage = async (event) => {
 			try {
 				const data = JSON.parse(event.data) as Message;
 				if (!data || !data.action) {
@@ -46,8 +57,79 @@ export class WebsocketClient {
 					});
 				}
 
-				if(data.action === Action.output_win){
-					
+				if (data.action === Action.output_win) {
+					if (!data.payload || !data.payload.data) {
+						console.error('Output win data is missing:', data);
+						return;
+					}
+					if (data.payload.data) {
+						const {
+							gameId,
+							isTeam1Win,
+							isNoTeamWin,
+							team1,
+							team2,
+							team1DeltaScore,
+							team2DeltaScore,
+						} = data.payload.data as {
+							gameId: string;
+							isTeam1Win: boolean;
+							isNoTeamWin?: boolean;
+							team1: GamePlayer[];
+							team2: GamePlayer[];
+							team1DeltaScore: number;
+							team2DeltaScore: number;
+						};
+						console.log(
+							`Game ID: ${gameId}, Team 1 Win: ${isTeam1Win}, Team 1 Delta Score: ${team1DeltaScore}, Team 2 Delta Score: ${team2DeltaScore}`,
+						);
+						let components;
+						if (team1.length === 1) {
+							components = [
+								new TextDisplayBuilder().setContent(
+									`# ${team1[0].minecraftId} VS ${team2[0].minecraftId}\n**${
+										!isNoTeamWin
+											? isTeam1Win
+												? team1[0].minecraftId
+												: team2[0].minecraftId
+											: 'No One'
+									} WON (${isTeam1Win ? team1DeltaScore : team2DeltaScore})**`,
+								),
+								new SeparatorBuilder()
+									.setSpacing(SeparatorSpacingSize.Small)
+									.setDivider(true),
+							];
+						} else {
+							components = [
+								new TextDisplayBuilder().setContent(
+									`# {${team1.map((p) => p.minecraftId).join(', ')}} VS ${team2
+										.map((p) => p.minecraftId)
+										.join(', ')}\n**${
+										!isNoTeamWin
+											? isTeam1Win
+												? team1.map((p) => p.minecraftId).join(', ')
+												: team2.map((p) => p.minecraftId).join(', ')
+											: 'No Team'
+									} WON (${isTeam1Win ? team1DeltaScore : team2DeltaScore})**`,
+								),
+								new SeparatorBuilder()
+									.setSpacing(SeparatorSpacingSize.Small)
+									.setDivider(true),
+							];
+						}
+						const channel = await this.discordClient?.channels.fetch(
+							'1386939249160355951',
+						);
+						if (channel?.isTextBased()) {
+							const textChannel = channel as
+								| GuildTextBasedChannel
+								| TextChannel;
+							textChannel.send({
+								components: components || [],
+								flags: MessageFlags.IsComponentsV2,
+							});
+						}
+					}
 				}
 
 				if (
@@ -89,7 +171,7 @@ export class WebsocketClient {
 		}
 		console.log('Reconnecting WebSocket client...');
 		setTimeout(() => {
-			this.initialize(this.connectUrl || ''); // Replace with your WebSocket server URL
+			this.initialize(this.connectUrl || '', this.discordClient as Client); // Replace with your WebSocket server URL
 		}, this.reconnectTime);
 	}
 

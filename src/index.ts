@@ -11,7 +11,7 @@ const client = new Client({
 	],
 });
 
-const websocket = WebsocketClient.initialize('ws://localhost:8080/ws');
+const websocket = WebsocketClient.initialize('ws://localhost:8080/ws',client);
 
 const commands = await loadCommands();
 client.on('interactionCreate', async (interaction) => {

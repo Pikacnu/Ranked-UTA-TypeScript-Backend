@@ -102,14 +102,17 @@ export const handler: Handler = async ({ ws, message, client, logger }) => {
 				status: status.success,
 				action: Action.output_win,
 				payload: {
-					gameId: client.game.id,
-					isTeam1Win,
-					team1: Team1,
-					team2: Team2,
-					team1DeltaScore:
-						K * ((isNoTeamWin ? 0 : isTeam1Win ? 1 : 0) - team1ExpectedScore),
-					team2DeltaScore:
-						K * ((isNoTeamWin ? 0 : isTeam1Win ? 0 : 1) - team2ExpectedScore),
+					data: {
+						gameId: client.game.id,
+						isTeam1Win,
+						isNoTeamWin,
+						team1: Team1,
+						team2: Team2,
+						team1DeltaScore:
+							K * ((isNoTeamWin ? 0 : isTeam1Win ? 1 : 0) - team1ExpectedScore),
+						team2DeltaScore:
+							K * ((isNoTeamWin ? 0 : isTeam1Win ? 0 : 1) - team2ExpectedScore),
+					},
 				},
 			}),
 		);
