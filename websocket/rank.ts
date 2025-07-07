@@ -84,3 +84,16 @@ export const calculateNewRating = (
 	kFactor: number = 32, // Default K factor
 ): number =>
 	Math.floor(currentRating + kFactor * (actualScore - expectedScore));
+
+export const getRoundByRankScore = (rankScore: number): number => {
+	switch (true) {
+		case rankScore < 1400:
+			return 2;
+		case rankScore < 1800:
+			return 3;
+		case rankScore < 2200:
+			return 4;
+		default:
+			return 1;
+	}
+};

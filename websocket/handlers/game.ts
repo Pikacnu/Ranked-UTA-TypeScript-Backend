@@ -79,7 +79,7 @@ export const handler: Handler = async ({ ws, message, client, logger }) => {
 						action: Action.transfer,
 						payload: {
 							transferData: {
-								targetServer: 'ruta.pikacnu.com',
+								targetServer: 'ranked-uta.pikacnu.com',
 								targetPort: 25565,
 								uuids: client.game.players.map((p) => p.uuid),
 							},
@@ -93,7 +93,7 @@ export const handler: Handler = async ({ ws, message, client, logger }) => {
 						status: status.success,
 						action: Action.whitelist_change,
 						payload: {
-							whilelist: [],
+							whitelist: [],
 						},
 					}),
 				);
