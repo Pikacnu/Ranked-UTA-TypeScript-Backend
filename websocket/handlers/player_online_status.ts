@@ -71,7 +71,7 @@ export const handler: Handler = async ({ ws, message, client, logger }) => {
 				action: Action.command,
 				payload: {
 					command: `function ranked:start_game {gameMode:${
-						QueueNameToSize[client.game.type] < 3 ? 4 : 7
+						QueueNameToSize[client.game.type] <= 3 ? 4 : 7
 					},gameRound:${
 						QueueNameToSize[client.game.type] > 3
 							? 1
