@@ -75,9 +75,7 @@ export const handler: Handler = async ({
 		}
 	}
 
-	console.log(partyToRemove);
-
-	if (isRemoved) {
+	if (!isRemoved) {
 		ws.send(
 			JSON.stringify({
 				status: status.success,

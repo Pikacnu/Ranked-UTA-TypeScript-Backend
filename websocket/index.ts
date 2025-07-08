@@ -351,11 +351,11 @@ setInterval(() => {
 			}),
 		);
 
-		// Notify the server about the match
+		// Notify the lobby server about the match
 		clients
 			.filter((c) => c.isLobby)
 			.forEach((client) => {
-				// Notify the client about the match
+				// Notify the lobby server about the match
 				server.publish(
 					client.clientId,
 					JSON.stringify({
@@ -380,7 +380,7 @@ setInterval(() => {
 						},
 					}),
 				);
-				// Notify the client about the transfer
+				// Notify the lobby server about the transfer
 				server.publish(
 					client.clientId,
 					JSON.stringify({
