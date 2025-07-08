@@ -10,7 +10,7 @@ import {
 } from '../types';
 import type { Handler } from './types';
 
-export const action = Action.game_status;
+export const action = Action.game_state;
 
 export const handler: Handler = async ({ ws, message, client, logger }) => {
 	const { payload } = message;

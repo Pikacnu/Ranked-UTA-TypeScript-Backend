@@ -75,7 +75,7 @@ export const handler: Handler = async ({
 		}
 	}
 
-	if (!isRemoved) {
+	if (isRemoved) {
 		ws.send(
 			JSON.stringify({
 				status: status.success,
