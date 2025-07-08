@@ -6,6 +6,11 @@ import type { Handler } from './types';
 export const action = Action.damage;
 
 export const handler: Handler = async ({ message, client }) => {
+	return;
+	// This Acton is disable due to not used anymore
+	// and commented out for future reference
+
+	/*
 	const { payload } = message;
 
 	if (!payload || !payload.data || !payload.data) {
@@ -30,4 +35,5 @@ export const handler: Handler = async ({ message, client }) => {
 		})
 		.where(eq(gameTable.id, client?.game?.id || ''))
 		.execute();
+		*/
 };

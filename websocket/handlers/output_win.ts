@@ -122,8 +122,15 @@ export const handler: Handler = async ({ ws, message, client, logger }) => {
 			// 更新玩家統計
 			for (const player of client.game!.players!) {
 				const isWinner = isTeam1Win ? player.isTeam1 : !player.isTeam1;
+				const score =
+					(
+						await db
+							.select({ score: playerTable.rankScore })
+							.from(playerTable)
+							.where(eq(playerTable.uuid, player.uuid))
+					)[0].score || 0;
 				const newRankScore = calculateNewRating(
-					player.score,
+					score,
 					player.isTeam1 ? team1ExpectedScore : team2ExpectedScore,
 					player.isTeam1 ? team1ActualScore : team2ActualScore,
 					K,

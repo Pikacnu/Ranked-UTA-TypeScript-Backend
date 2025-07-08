@@ -93,7 +93,7 @@ export class WebsocketClient {
 												? team1[0].minecraftId
 												: team2[0].minecraftId
 											: 'No One'
-									} WON (${isTeam1Win ? team1DeltaScore : team2DeltaScore})**`,
+									} WON (+${isTeam1Win ? team1DeltaScore : team2DeltaScore})**`,
 								),
 								new SeparatorBuilder()
 									.setSpacing(SeparatorSpacingSize.Small)
@@ -102,15 +102,13 @@ export class WebsocketClient {
 						} else {
 							components = [
 								new TextDisplayBuilder().setContent(
-									`# {${team1.map((p) => p.minecraftId).join(', ')}} VS ${team2
+									`# \`Team1\` VS \`Team2\`\n-# \`Team1\` - ${team1
 										.map((p) => p.minecraftId)
-										.join(', ')}\n**${
-										!isNoTeamWin
-											? isTeam1Win
-												? team1.map((p) => p.minecraftId).join(', ')
-												: team2.map((p) => p.minecraftId).join(', ')
-											: 'No Team'
-									} WON (${isTeam1Win ? team1DeltaScore : team2DeltaScore})**`,
+										.join(', ')}\n-# \`Team2\` - ${team2
+										.map((p) => p.minecraftId)
+										.join(', ')} \n**${
+										isNoTeamWin ? 'No Team' : isTeam1Win ? 'Team1' : 'Team2'
+									} WON (+${isTeam1Win ? team1DeltaScore : team2DeltaScore})**`,
 								),
 								new SeparatorBuilder()
 									.setSpacing(SeparatorSpacingSize.Small)
