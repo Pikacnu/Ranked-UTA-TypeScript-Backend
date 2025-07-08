@@ -254,7 +254,7 @@ const partyStatusShower = setInterval(() => {
 
 const heartbeat = setInterval(() => {
 	clients = clients.filter((client) => {
-		if (Date.now() - (client.lastHeartbeat || 0) > 30 * 1000) {
+		if (Date.now() - (client.lastHeartbeat || 0) > 60 * 1000) {
 			logger.warn('Client timed out', { clientId: client.clientId });
 			server.publish(
 				client.clientId,
@@ -278,9 +278,10 @@ const heartbeat = setInterval(() => {
 
 // Matchmaking loop
 setInterval(() => {
+	const newMatches = matchmaker.matchAllQueues();
 	const matchResults: (MatchResult & {
 		id: number;
-	})[] = [...matchedWaitingQueue, ...matchmaker.matchAllQueues()].map(
+	})[] = [...matchedWaitingQueue, ...newMatches].map(
 		(result, index) =>
 			({
 				...result,
@@ -301,9 +302,34 @@ setInterval(() => {
 
 	if (pendingServers.length === 0) {
 		logger.warn('No pending servers available for matchmaking');
-		matchedWaitingQueue.push(...matchResults);
+
+		// Only add new matches to waiting queue, not existing ones
+		const newMatchesToQueue = newMatches.map((result, index) => ({
+			...result,
+			id: Date.now() + matchedWaitingQueue.length + index,
+		}));
+
+		// Limit the waiting queue size to prevent stack overflow
+		const maxQueueSize = 100;
+		if (matchedWaitingQueue.length + newMatchesToQueue.length > maxQueueSize) {
+			logger.warn(
+				`Waiting queue size limit reached (${maxQueueSize}), dropping oldest matches`,
+			);
+			const totalNewSize =
+				matchedWaitingQueue.length + newMatchesToQueue.length;
+			const itemsToRemove = totalNewSize - maxQueueSize;
+			matchedWaitingQueue.splice(0, itemsToRemove);
+		}
+
+		matchedWaitingQueue.push(...newMatchesToQueue);
+		logger.debug(
+			`Added ${newMatchesToQueue.length} new matches to waiting queue. Total waiting: ${matchedWaitingQueue.length}`,
+		);
 		return;
 	}
+
+	// Clear the waiting queue as we're processing matches
+	matchedWaitingQueue.length = 0;
 
 	pendingServers.forEach((gameServer) => {
 		const result =
@@ -314,11 +340,11 @@ setInterval(() => {
 			});
 			return;
 		}
-		if (matchResults.some((r) => r.id === result.id)) {
-			matchedWaitingQueue.splice(
-				matchedWaitingQueue.findIndex((r) => r.id === result.id),
-				1,
-			);
+
+		// Remove the used match result from the array to prevent reuse
+		const resultIndex = matchResults.findIndex((r) => r.id === result.id);
+		if (resultIndex !== -1) {
+			matchResults.splice(resultIndex, 1);
 		}
 
 		logger.info('Match found', {
@@ -460,6 +486,15 @@ setInterval(() => {
 			.execute();
 		logger.info('Game started', { gameId: gameServer?.game?.id });
 	});
+
+	// Add any remaining unprocessed matches back to waiting queue
+	if (matchResults.length > 0) {
+		logger.debug(
+			`Adding ${matchResults.length} unprocessed matches back to waiting queue`,
+		);
+		matchedWaitingQueue.push(...matchResults);
+	}
+
 	logger.info('Matchmaking completed', JSON.stringify(clients, null, 2));
 }, 5 * 1000);
 
