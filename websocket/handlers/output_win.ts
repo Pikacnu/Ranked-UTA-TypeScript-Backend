@@ -5,7 +5,7 @@ import {
 	WebSocketError,
 	UUIDFromArray,
 	UUIDStringToArray,
-	MinecraftNbtProcessToJson,
+	MinecraftNbtProcessToJsonString,
 	status,
 } from '../types';
 import {
@@ -35,8 +35,10 @@ export const handler: Handler = async ({ ws, message, client, logger }) => {
 	}
 
 	try {
-		console.log(MinecraftNbtProcessToJson(payload.data.data[0]));
-		const winData = JSON.parse(MinecraftNbtProcessToJson(payload.data.data[0]));
+		console.log(MinecraftNbtProcessToJsonString(payload.data.data[0]));
+		const winData = JSON.parse(
+			MinecraftNbtProcessToJsonString(payload.data.data[0]),
+		);
 		const { win, lose } = winData;
 
 		// 驗證 winData 格式

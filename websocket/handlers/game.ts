@@ -3,7 +3,7 @@ import db, { gameTable } from '../../src/db';
 import {
 	Action,
 	GameStatus,
-	MinecraftNbtProcessToJson,
+	MinecraftNbtProcessToJsonString,
 	ServerStatus,
 	status,
 	WebSocketError,

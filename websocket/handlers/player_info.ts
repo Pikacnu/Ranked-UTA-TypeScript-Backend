@@ -2,7 +2,7 @@ import {
 	Action,
 	WebSocketError,
 	UUIDFromArray,
-	MinecraftNbtProcessToJson,
+	MinecraftNbtProcessToJsonString,
 } from '../types';
 import type { Handler } from './types';
 
@@ -16,8 +16,10 @@ export const handler: Handler = async ({ message, logger }) => {
 	}
 
 	try {
-		console.log(MinecraftNbtProcessToJson(payload.data.data[0]));
-		const data = JSON.parse(MinecraftNbtProcessToJson(payload.data.data[0]));
+		console.log(MinecraftNbtProcessToJsonString(payload.data.data[0]));
+		const data = JSON.parse(
+			MinecraftNbtProcessToJsonString(payload.data.data[0]),
+		);
 		const uuid = UUIDFromArray(data.UUID);
 		const killCount = data.elim || 0;
 		const deathCount = data.death || 0;

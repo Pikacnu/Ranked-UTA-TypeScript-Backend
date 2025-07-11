@@ -1,0 +1,1 @@
+ALTER TABLE `player` ADD `player_settings` text;

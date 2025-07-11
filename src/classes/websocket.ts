@@ -1,13 +1,20 @@
 import type { MesssageQueueEntry } from '#/commands/type';
-import { Action, type GamePlayer, type Message as WSMessage } from '@/types';
+import {
+	Action,
+	SizeToQueueName,
+	type GamePlayer,
+	type Message as WSMessage,
+} from '@/types';
 import { type Message } from '#/commands/type';
 import {
 	Client,
 	MessageFlags,
+	SectionBuilder,
 	SeparatorBuilder,
 	SeparatorSpacingSize,
 	TextChannel,
 	TextDisplayBuilder,
+	ThumbnailBuilder,
 	type GuildTextBasedChannel,
 } from 'discord.js';
 
@@ -101,18 +108,41 @@ export class WebsocketClient {
 							];
 						} else {
 							components = [
+								new SectionBuilder()
+									.setThumbnailAccessory(
+										new ThumbnailBuilder().setURL(
+											'https://focalsalt.github.io/data/img/team1.png',
+										),
+									)
+									.addTextDisplayComponents(
+										new TextDisplayBuilder().setContent('# Team1'),
+										new TextDisplayBuilder().setContent(
+											`Player: ${team1.map((p) => p.minecraftId).join(', ')}`,
+										),
+									),
+								new SectionBuilder()
+									.setThumbnailAccessory(
+										new ThumbnailBuilder().setURL(
+											'https://focalsalt.github.io/data/img/team2.png',
+										),
+									)
+									.addTextDisplayComponents(
+										new TextDisplayBuilder().setContent('# Team2'),
+										new TextDisplayBuilder().setContent(
+											`Player: ${team2.map((p) => p.minecraftId).join(', ')}`,
+										),
+									),
 								new TextDisplayBuilder().setContent(
-									`# \`Team1\` VS \`Team2\`\n-# \`Team1\` - ${team1
-										.map((p) => p.minecraftId)
-										.join(', ')}\n-# \`Team2\` - ${team2
-										.map((p) => p.minecraftId)
-										.join(', ')} \n**${
-										isNoTeamWin ? 'No Team' : isTeam1Win ? 'Team1' : 'Team2'
-									} WON (+${isTeam1Win ? team1DeltaScore : team2DeltaScore})**`,
+									`## ${SizeToQueueName[team1.length]} | ${
+										isNoTeamWin ? 'No One' : isTeam1Win ? 'Team1' : 'Team2'
+									} Won !!!\nTheir rank score increased by **${
+										isNoTeamWin
+											? team1DeltaScore
+											: isTeam1Win
+											? team1DeltaScore
+											: team2DeltaScore
+									}**`,
 								),
-								new SeparatorBuilder()
-									.setSpacing(SeparatorSpacingSize.Small)
-									.setDivider(true),
 							];
 						}
 						const channel = await this.discordClient?.channels.fetch(

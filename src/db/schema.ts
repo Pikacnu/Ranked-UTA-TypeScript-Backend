@@ -4,6 +4,7 @@ import {
 	type Message,
 	type PartyPlayer,
 	GameStatus,
+	type PlayerSettingDataStructure,
 } from '../../websocket/types';
 
 export const playerTable = sqliteTable('player', {
@@ -16,6 +17,9 @@ export const playerTable = sqliteTable('player', {
 	assistCount: int(),
 	gameCount: int(),
 	rankScore: int().default(0),
+	playerSettings: text('player_settings', {
+		mode: 'json',
+	}).$type<PlayerSettingDataStructure>(),
 });
 
 export const partyTable = sqliteTable('party', {

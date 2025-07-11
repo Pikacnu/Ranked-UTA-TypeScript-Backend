@@ -22,7 +22,7 @@ export enum Action {
 	queue_leave = 'queue_leave',
 	queue_match = 'queue_match',
 	party_disbanded = 'party_disbanded',
-	
+
 	// game server actions
 	team_join = 'team_join',
 	whitelist_change = 'whitelist_change',
@@ -30,7 +30,11 @@ export enum Action {
 	map_choose = 'map_choose',
 	kill = 'kill',
 	damage = 'damage',
-	
+
+	// player setting
+	player_setting = 'player_setting',
+	get_player_setting = 'get_player_settings',
+
 	// minecraft server actions
 	player_online_status = 'player_online_status',
 	transfer = 'transfer',
@@ -96,6 +100,12 @@ export type PlayerData = {
 	score?: number;
 };
 
+export type StorageData = {
+	storage: string;
+	key: string;
+	data: string[];
+};
+
 export type Message = {
 	action: Action;
 	sessionId?: string;
@@ -135,6 +145,7 @@ export type Message = {
 			uuids: string[];
 			connection: Connection;
 		};
+		playerSetting?: PlayerSettingDataStructure;
 		transferData?: {
 			targetServer: string;
 			targetPort: number;
@@ -249,6 +260,16 @@ export class WebSocketError extends Error {
 	}
 }
 
+export type PlayerSettingDataStructure = {
+	uuid: string;
+	UUID?: string; // For backward compatibility
+	N: number;
+	Q: number;
+	S: number;
+	U: number;
+	B: number;
+};
+
 export const UUIDFromArray = (arr: number[]): string => {
 	if (arr.length !== 4) {
 		throw new Error('Array must be of length 4');
@@ -286,7 +307,7 @@ export const UUIDStringToArray = (uuid: string): number[] =>
 		.split(',')
 		.map((v) => parseInt(v, 10));
 
-export const MinecraftNbtProcessToJson = (data: string): any =>
+export const MinecraftNbtProcessToJsonString = (data: string): string =>
 	data
 		.replaceAll(/I;/g, '')
 		.replaceAll(/[A-Za-z]+/gm, (m) => (['float'].includes(m) ? m : `"${m}"`));

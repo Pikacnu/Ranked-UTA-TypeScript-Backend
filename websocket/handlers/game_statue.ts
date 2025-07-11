@@ -3,10 +3,11 @@ import db, { gameTable } from '../../src/db';
 import {
 	Action,
 	GameStatus,
-	MinecraftNbtProcessToJson,
+	MinecraftNbtProcessToJsonString,
 	ServerStatus,
 	status,
 	WebSocketError,
+	type StorageData,
 } from '../types';
 import type { Handler } from './types';
 
@@ -23,13 +24,11 @@ export const handler: Handler = async ({ ws, message, client, logger }) => {
 	}
 
 	try {
-		const statusData = payload.data as {
-			storage: string;
-			key: string;
-			data: string[];
-		};
+		const statusData = payload.data as StorageData;
 
-		const data = JSON.parse(MinecraftNbtProcessToJson(statusData.data[0]));
+		const data = JSON.parse(
+			MinecraftNbtProcessToJsonString(statusData.data[0]),
+		);
 		const banCharacter: number[] = data?.ban;
 		const map: number = data?.map;
 		if (client?.game?.id) {
