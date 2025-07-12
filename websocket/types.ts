@@ -262,7 +262,7 @@ export class WebSocketError extends Error {
 
 export type PlayerSettingDataStructure = {
 	uuid: string;
-	UUID?: string; // For backward compatibility
+	UUID?: number[]; // For backward compatibility
 	N: number;
 	Q: number;
 	S: number;

@@ -17,11 +17,10 @@ export const handler: Handler = async ({ ws, message, logger }) => {
 	if (!payload || !payload.data) {
 		throw new Error('Command is required in player setting payload');
 	}
-
 	const data = JSON.parse(
-		MinecraftNbtProcessToJsonString(payload.data),
+		MinecraftNbtProcessToJsonString(payload.data.data[0]),
 	) as PlayerSettingDataStructure;
-	const playerUuid = UUIDFromArray(UUIDStringToArray(data.UUID || ''));
+	const playerUuid = UUIDFromArray(data.UUID||[]);
 	if (!playerUuid) {
 		throw new Error('Invalid UUID format in player setting payload');
 	}

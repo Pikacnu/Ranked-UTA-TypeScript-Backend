@@ -253,6 +253,7 @@ const partyStatusShower = setInterval(() => {
 }, 30 * 1000);
 
 const heartbeat = setInterval(() => {
+	/*
 	clients = clients.filter((client) => {
 		if (Date.now() - (client.lastHeartbeat || 0) > 60 * 1000) {
 			logger.warn('Client timed out', { clientId: client.clientId });
@@ -266,7 +267,7 @@ const heartbeat = setInterval(() => {
 			return false;
 		}
 		return true;
-	});
+	});*/
 	server.publish(
 		'heartbeat',
 		JSON.stringify({
@@ -274,7 +275,7 @@ const heartbeat = setInterval(() => {
 			action: Action.heartbeat,
 		}),
 	);
-}, 10000);
+}, 10_000);
 
 // Matchmaking loop
 setInterval(() => {
