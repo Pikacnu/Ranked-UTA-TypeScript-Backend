@@ -5,6 +5,9 @@ A multiplayer game matching and WebSocket communication system built with TypeSc
 Used to Ranked UTA Project.
 Frontend is [here](https://github.com/Pikacnu/Ranked-UTA-Fronetend-Java) (Minecraft Server Mod)
 
+Undertale Arena Map Made By [Nebulirion](https://www.youtube.com/@nebulirion)
+Modified and updated by [FocalSalt](https://github.com/focalsalt)
+
 ## Project Structure
 
 ### Core Components
