@@ -15,6 +15,7 @@ import {
 import db, { gameTable } from '../src/db';
 import { QueueManager, PartyMatchmaker, MatchResult } from './queue';
 import { handleMessage } from './handlers';
+import { Webhook } from './webhook';
 
 /*
 	Gate File Path "C:\Users\User\AppData\Local\Gate\bin"
@@ -22,6 +23,8 @@ import { handleMessage } from './handlers';
 */
 
 const port = 8080;
+
+const webhookClient = new Webhook(process.env.DiscordWebhookUrl || '');
 
 // Console logging utilities
 const logger = {
@@ -253,7 +256,6 @@ const partyStatusShower = setInterval(() => {
 }, 30 * 1000);
 
 const heartbeat = setInterval(() => {
-	/*
 	clients = clients.filter((client) => {
 		if (Date.now() - (client.lastHeartbeat || 0) > 60 * 1000) {
 			logger.warn('Client timed out', { clientId: client.clientId });
@@ -264,10 +266,11 @@ const heartbeat = setInterval(() => {
 					action: Action.disconnect,
 				}),
 			);
+			Webhook.sendOffline(client);
 			return false;
 		}
 		return true;
-	});*/
+	});
 	server.publish(
 		'heartbeat',
 		JSON.stringify({
@@ -499,8 +502,9 @@ setInterval(() => {
 	logger.info('Matchmaking completed', JSON.stringify(clients, null, 2));
 }, 5 * 1000);
 
-process.on('SIGINT', () => {
+process.on('SIGINT', async () => {
 	clearInterval(heartbeat);
+	//await Webhook.sendServerOffline();
 	logger.info('Server shutting down...');
 	server.stop();
 	logger.info('Log saved to log.json');

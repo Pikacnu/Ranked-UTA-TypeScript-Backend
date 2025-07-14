@@ -1,6 +1,7 @@
 import { Status } from 'discord.js';
 import { Action, status, WebSocketError } from '../types';
 import type { Handler } from './types';
+import { Webhook } from '@/webhook';
 
 export const action = Action.handshake;
 
@@ -31,4 +32,5 @@ export const handler: Handler = async ({ ws, message, client, logger }) => {
 	client.serverPort = payload.handshake.serverPort;
 
 	client.isLobby = payload?.handshake?.isLobby || false;
+	Webhook.sendOnline(client);
 };
