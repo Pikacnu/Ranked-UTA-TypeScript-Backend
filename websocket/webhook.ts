@@ -38,14 +38,14 @@ export class Webhook {
 		}
 		if (isOnline) {
 			return `
-Server IP: ${server.ip}
-Server Port: ${server.port}
-Server UUID: ${server.uuid}
+Server IP: ${server.serverIP}
+Server Port: ${server.serverPort}
+Server UUID: ${server.clientId}
 Server IsLobby: ${server.isLobby}`;
 		} else {
 			return `
-Server IP: ${server.ip}
-Server UUID: ${server.uuid}
+Server IP: ${server.serverIP}
+Server UUID: ${server.clientId}
 Server IsLobby: ${server.isLobby}`;
 		}
 	}
