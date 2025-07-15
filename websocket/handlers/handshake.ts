@@ -32,5 +32,7 @@ export const handler: Handler = async ({ ws, message, client, logger }) => {
 	client.serverPort = payload.handshake.serverPort;
 
 	client.isLobby = payload?.handshake?.isLobby || false;
-	Webhook.sendOnline(client);
+	if (client.clientId !== 'Discord-Client') {
+		Webhook.sendOnline(client);
+	}
 };

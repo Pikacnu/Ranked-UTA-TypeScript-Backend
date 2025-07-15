@@ -502,11 +502,13 @@ setInterval(() => {
 	logger.info('Matchmaking completed', JSON.stringify(clients, null, 2));
 }, 5 * 1000);
 
-process.on('SIGINT', async () => {
+process.on('SIGTERM', async () => await stop());
+
+async function stop() {
 	clearInterval(heartbeat);
-	//await Webhook.sendServerOffline();
+	await Webhook.sendServerOffline();
 	logger.info('Server shutting down...');
 	server.stop();
 	logger.info('Log saved to log.json');
 	process.exit(0);
-});
+}
